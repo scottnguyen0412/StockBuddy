@@ -1,0 +1,354 @@
+/* Styles cho Chrome Extension AI Keywords Generator */
+
+/* Floating button styles */
+#ai-keywords-btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  user-select: none;
+  animation: slideIn 0.5s ease-out;
+}
+
+#ai-keywords-btn:hover {
+  cursor: pointer;
+}
+
+#ai-keywords-btn .ai-btn-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#ai-keywords-btn .ai-btn-icon {
+  font-size: 16px;
+  animation: pulse 2s infinite;
+}
+
+#ai-keywords-btn .ai-btn-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Image overlay styles */
+.ai-image-overlay {
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+}
+
+.ai-overlay-btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  user-select: none;
+}
+
+.ai-overlay-btn:hover {
+  background: linear-gradient(45deg, #ff5252, #d32f2f) !important;
+  transform: scale(1.05);
+}
+
+/* Status notification styles */
+.ai-status {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  user-select: none;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.ai-status.success {
+  background: linear-gradient(135deg, #4caf50, #388e3c) !important;
+  border-left: 4px solid #2e7d32;
+}
+
+.ai-status.error {
+  background: linear-gradient(135deg, #f44336, #d32f2f) !important;
+  border-left: 4px solid #c62828;
+}
+
+.ai-status.loading {
+  background: linear-gradient(135deg, #ff9800, #f57c00) !important;
+  border-left: 4px solid #ef6c00;
+  animation: pulse 1.5s infinite;
+}
+
+/* Form highlight styles */
+.ai-form-highlight {
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5) !important;
+  border: 2px solid #667eea !important;
+  animation: highlight 0.5s ease-out;
+}
+
+.ai-form-success {
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5) !important;
+  border: 2px solid #4caf50 !important;
+  animation: successPulse 0.8s ease-out;
+}
+
+/* Loading spinner */
+.ai-loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+/* Progress bar */
+.ai-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  z-index: 10002;
+  transform: translateX(-100%);
+  animation: progressSlide 2s ease-in-out infinite;
+}
+
+/* Tooltip styles */
+.ai-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 10001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.ai-tooltip.show {
+  opacity: 1;
+}
+
+.ai-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+/* Keyboard shortcut indicators */
+.ai-shortcut-hint {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: monospace;
+  z-index: 10001;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.ai-shortcut-hint.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Image analysis indicator */
+.ai-analyzing::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #667eea;
+  animation: spin 1s linear infinite;
+  z-index: 10000;
+}
+
+/* Site-specific styles */
+/* Adobe Stock specific */
+[data-site="adobe"] .ai-keywords-btn {
+  background: linear-gradient(135deg, #ff0000, #cc0000);
+}
+
+[data-site="adobe"] .ai-status {
+  border-radius: 4px;
+}
+
+/* Shutterstock specific */
+[data-site="shutterstock"] .ai-keywords-btn {
+  background: linear-gradient(135deg, #000000, #333333);
+}
+
+[data-site="shutterstock"] .ai-status {
+  border-radius: 8px;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes highlight {
+  0% {
+    box-shadow: 0 0 0 rgba(102, 126, 234, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+  }
+}
+
+@keyframes successPulse {
+  0% {
+    box-shadow: 0 0 0 rgba(76, 175, 80, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+  }
+}
+
+@keyframes progressSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  #ai-keywords-btn {
+    top: 10px !important;
+    right: 10px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+  
+  .ai-status {
+    top: 60px !important;
+    right: 10px !important;
+    max-width: 250px !important;
+    font-size: 12px !important;
+  }
+  
+  .ai-overlay-btn {
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ai-tooltip {
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+  }
+  
+  .ai-tooltip::after {
+    border-color: rgba(255, 255, 255, 0.9) transparent transparent transparent;
+  }
+  
+  .ai-shortcut-hint {
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+  }
+}
+
+/* Accessibility improvements */
+.ai-keywords-btn:focus,
+.ai-overlay-btn:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  #ai-keywords-btn {
+    border: 2px solid white;
+  }
+  
+  .ai-overlay-btn {
+    border: 2px solid white;
+  }
+  
+  .ai-status {
+    border: 2px solid white;
+  }
+}
+
+/* Print styles */
+@media print {
+  #ai-keywords-btn,
+  .ai-status,
+  .ai-image-overlay,
+  .ai-tooltip,
+  .ai-shortcut-hint,
+  .ai-progress-bar {
+    display: none !important;
+  }
+}
