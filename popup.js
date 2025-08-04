@@ -7,67 +7,34 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Save settings button
-  document.getElementById('saveSettings').addEventListener('click', () => {
+  document.getElementById('saveSettings').addEventListener('click', async () => {
     const apiKey = document.getElementById('apiKey').value;
     const language = document.getElementById('language').value;
     const autoDetect = document.getElementById('autoDetect').checked;
 
+    // Kiểm tra kết nối trước khi lưu
+    showStatus('Đang kiểm tra kết nối...', 'loading');
+    const connectionStatus = await checkConnection(apiKey);
+    
+    if (!connectionStatus.success) {
+      showStatus('Lỗi kết nối API: ' + connectionStatus.error, 'error');
+      return;
+    }
+
+    // Lưu settings nếu kết nối thành công
     chrome.storage.sync.set({
       apiKey,
       language,
       autoDetect
     }, () => {
-      showStatus('Đã lưu cài đặt!', 'success');
-    });
-  });
-
-  // Generate keywords button
-  document.getElementById('generateKeywords').addEventListener('click', async () => {
-    const apiKey = document.getElementById('apiKey').value;
-    if (!apiKey) {
-      showStatus('Vui lòng nhập API key!', 'error');
-      return;
-    }
-
-    // Check connection first
-    showStatus('Đang kiểm tra kết nối...', 'loading');
-    const connectionStatus = await checkConnection(apiKey);
-    if (!connectionStatus.success) {
-      showStatus('Lỗi kết nối: ' + connectionStatus.error, 'error');
-      return;
-    }
-
-    showStatus('Đang phân tích ảnh...', 'loading');
-
-    // Get active tab and send message to content script
-    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-    chrome.tabs.sendMessage(tab.id, {action: 'getAllThumbnails'}, async (response) => {
-      if (!response || !response.success) {
-        showStatus('Không thể lấy ảnh: ' + (response?.error || 'Unknown error'), 'error');
-        return;
-      }
-
-      try {
-        for (const base64Image of response.thumbnails) {
-          const result = await generateKeywords(apiKey, base64Image);
-          
-          // Send results back to content script to fill forms
-          chrome.tabs.sendMessage(tab.id, {
-            action: 'fillForms',
-            data: result
-          });
-        }
-        
-        showStatus('Đã tạo keywords thành công!', 'success');
-      } catch (error) {
-        showStatus('Lỗi: ' + error.message, 'error');
-      }
+      showStatus('✅ Đã kết nối và lưu API key thành công!', 'success');
     });
   });
 });
 
 async function checkConnection(apiKey) {
   try {
+    showStatus('Đang kết nối với Gemini...', 'loading');
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
       method: 'POST',
       headers: {
@@ -89,7 +56,10 @@ async function checkConnection(apiKey) {
       };
     }
 
-    return { success: true };
+    return { 
+      success: true,
+      message: 'Kết nối Gemini API thành công!'
+    };
   } catch (error) {
     return {
       success: false,
@@ -169,7 +139,7 @@ function getPrompt(language) {
     Format as JSON:
     {
       "title_en": "English title",
-      "title_vi": "Tiêu đề tiếng Việt",
+      "title_vi": "Tiêu đề tiếng Việt", 
       "keywords_en": "keyword1, keyword2...",
       "keywords_vi": "từkhóa1, từkhóa2..."
     }`
@@ -182,7 +152,10 @@ function parseGeminiResponse(data) {
   try {
     const text = data.candidates[0].content.parts[0].text;
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    return JSON.parse(jsonMatch[0]);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error('No JSON found in response');
   } catch (error) {
     throw new Error('Invalid response format from API');
   }
@@ -190,7 +163,16 @@ function parseGeminiResponse(data) {
 
 function showStatus(message, type) {
   const statusEl = document.getElementById('status');
-  statusEl.textContent = message;
+  
+  if (type === 'loading') {
+    statusEl.innerHTML = `
+      <div class="loading-spinner"></div>
+      <span>${message}</span>
+    `;
+  } else {
+    statusEl.textContent = message;
+  }
+  
   statusEl.className = `status ${type}`;
   statusEl.style.display = 'block';
   

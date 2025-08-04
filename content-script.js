@@ -154,7 +154,13 @@ function injectGenerateButton() {
     }
     
     // Hiển thị loading
-    generateBtn.innerHTML = '⌛ Đang xử lý...';
+    generateBtn.innerHTML = `
+      <div class="loading-spinner"></div>
+      <span>Đang phân tích...</span>
+    `;
+    generateBtn.style.display = 'flex';
+    generateBtn.style.alignItems = 'center';
+    generateBtn.style.gap = '8px';
     generateBtn.disabled = true;
 
     try {

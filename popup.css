@@ -64,6 +64,9 @@
   background: linear-gradient(135deg, #ff9800, #f57c00) !important;
   border-left: 4px solid #ef6c00;
   animation: pulse 1.5s infinite;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Form highlight styles */
@@ -79,16 +82,23 @@
   animation: successPulse 0.8s ease-out;
 }
 
-/* Loading spinner */
-.ai-loading-spinner {
+/* Loading spinner styles */
+.loading-spinner {
   display: inline-block;
   width: 20px;
   height: 20px;
+  margin-right: 8px;
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: #fff;
   animation: spin 1s ease-in-out infinite;
-  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Progress bar */
