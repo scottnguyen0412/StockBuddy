@@ -68,45 +68,6 @@ async function checkConnection(apiKey) {
   }
 }
 
-async function generateKeywords(apiKey, base64Image) {
-  const language = document.getElementById('language').value;
-  
-  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [
-          {
-            text: getPrompt(language)
-          },
-          {
-            inline_data: {
-              mime_type: "image/jpeg",
-              data: base64Image
-            }
-          }
-        ]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      }
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return parseGeminiResponse(data);
-}
 
 function getPrompt(language) {
   const prompts = {
@@ -146,19 +107,6 @@ function getPrompt(language) {
   };
   
   return prompts[language] || prompts.en;
-}
-
-function parseGeminiResponse(data) {
-  try {
-    const text = data.candidates[0].content.parts[0].text;
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error('No JSON found in response');
-  } catch (error) {
-    throw new Error('Invalid response format from API');
-  }
 }
 
 function showStatus(message, type) {

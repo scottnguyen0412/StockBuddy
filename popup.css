@@ -362,3 +362,146 @@
     display: none !important;
   }
 }
+
+/* Container cho tất cả các thông báo toast */
+.custom-toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Style cho từng toast (ĐÃ CẬP NHẬT) */
+.custom-toast {
+    display: flex; /* <-- THÊM MỚI */
+    justify-content: space-between; /* <-- THÊM MỚI */
+    align-items: center; /* <-- THÊM MỚI */
+    gap: 15px; /* <-- THÊM MỚI: Khoảng cách giữa text và nút X */
+    padding: 12px 18px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.4s cubic-bezier(0.215, 0.610, 0.355, 1);
+}
+
+
+.custom-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.custom-toast-message {
+    flex-grow: 1; /* Để nội dung chiếm hết không gian còn lại */
+}
+
+.custom-toast-close {
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.custom-toast-close:hover {
+    opacity: 1;
+}
+
+/* Style cho các loại toast khác nhau */
+.custom-toast.success { background-color: #4CAF50; }
+.custom-toast.error { background-color: #f44336; }
+.custom-toast.info { background-color: #2196F3; }
+.custom-toast.warning { background-color: #ff9800; }
+
+
+/* --- Styles cho hộp thoại xác nhận (thay thế confirm()) --- */
+
+/* Lớp phủ nền */
+.custom-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10002;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.custom-confirm-overlay.show {
+    opacity: 1;
+}
+
+/* Hộp thoại modal */
+.custom-confirm-modal {
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.2s ease-in-out;
+}
+
+.custom-confirm-overlay.show .custom-confirm-modal {
+    transform: scale(1);
+}
+
+.custom-confirm-modal h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 20px;
+    color: #333;
+}
+
+.custom-confirm-modal p {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.custom-confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.custom-confirm-button {
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.custom-confirm-button:active {
+    transform: scale(0.97);
+}
+
+.custom-confirm-button.confirm {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.custom-confirm-button.cancel {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ddd;
+}
