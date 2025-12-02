@@ -1,4 +1,4 @@
-// content.js - Update: Clean Title (No Special Chars) & Stable Features
+// content.js - Update: Robust Adobe Selectors (From content-script.js)
 
 class KeywordGenerator {
   constructor() {
@@ -46,7 +46,7 @@ class KeywordGenerator {
       const btn = document.createElement('button');
       btn.className = 'sb-inline-btn';
       btn.innerHTML = '✨ Auto Fill with StockBuddy';
-      btn.title = "Tự động điền Description & Keywords";
+      btn.title = "Tự động điền cho ảnh này";
       
       btn.onclick = (e) => {
         e.preventDefault();
@@ -204,7 +204,6 @@ class KeywordGenerator {
 
   // --- API CALL ---
   async callGeminiAPI(base64, apiKey) {
-    // --- PROMPT MỚI: Loại bỏ tên & ký tự đặc biệt ---
     const prompt = `Analyze this stock photo and generate:
             1. A compelling title (max 200 chars, suitable for stock photography).
                IMPORTANT: Do NOT include any personal names, photographer names, or "By [Name]".
@@ -215,7 +214,6 @@ class KeywordGenerator {
               "title": "Title here",
               "keywords": "keyword1, keyword2, ..."
             }`;
-            
     const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
     const response = await fetch(url, {
       method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
@@ -262,6 +260,15 @@ class KeywordGenerator {
     });
   }
 
+  // Hàm mới: Tìm element dựa trên danh sách selector (lấy từ content-script.js)
+  findElementBySelectors(selectors) {
+    for (const selector of selectors) {
+      const element = document.querySelector(selector);
+      if (element) return element;
+    }
+    return null;
+  }
+
   hasExistingData() {
     if (this.currentSite === 'adobe') {
         const title = document.querySelector('input[name="title"]');
@@ -275,7 +282,6 @@ class KeywordGenerator {
     return false;
   }
 
-  // --- LOGIC TÌM ẢNH ---
   findActiveImage() {
     if (this.currentSite === 'adobe') {
       return document.querySelector('.infer-preview-image img') || 
@@ -283,11 +289,8 @@ class KeywordGenerator {
     } 
     
     if (this.currentSite === 'shutterstock') {
-      // 1. TÌM CARD ĐANG ACTIVE
       const activeCardImg = document.querySelector('div[data-testid="asset-card"][aria-checked="true"] img');
       if (activeCardImg) return activeCardImg;
-
-      // 2. Fallback
       const largePreview = document.querySelector('div[data-automation-id="content-editor-preview"] img');
       if (largePreview) return largePreview;
     }
@@ -363,15 +366,51 @@ class KeywordGenerator {
     });
   }
 
+  // --- FILL FORMS (Đã cập nhật Selectors cho Adobe) ---
   async fillForms(data) {
     const desc = data.title; 
     const keys = data.keywords;
 
     if (this.currentSite === 'adobe') {
-      const titleInput = document.querySelector('input[name="title"]');
-      const keysInput = document.querySelector('textarea.keywords-input');
-      if (titleInput) this.simulateInput(titleInput, desc, true);
-      if (keysInput) { this.simulateInput(keysInput, keys, true); this.simulateEnter(keysInput); }
+      // 1. Selectors cho Title (Lấy từ content-script.js)
+      const titleSelectors = [
+          "textarea.title-input",
+          'input[data-testid="title"]',
+          'textarea[data-testid="title"]',
+          'input[name="title"]',
+          'textarea[name="title"]',
+          '[placeholder*="title" i]',
+          '[placeholder*="Title" i]'
+      ];
+      const titleInput = this.findElementBySelectors(titleSelectors);
+
+      // 2. Selectors cho Keywords (Lấy từ content-script.js)
+      const keywordSelectors = [
+          "textarea[name=keywordsUITextArea]",
+          'textarea.keywords-input',
+          'textarea[data-testid="keywords"]',
+          'input[data-testid="keywords"]',
+          'textarea[name="keywords"]',
+          'input[name="keywords"]',
+          '[placeholder*="keyword" i]',
+          '[placeholder*="Keyword" i]'
+      ];
+      const keysInput = this.findElementBySelectors(keywordSelectors);
+
+      if (titleInput) {
+          this.simulateInput(titleInput, desc, true);
+          console.log("Adobe: Found & Filled Title");
+      } else {
+          console.warn("Adobe: Không tìm thấy ô Title");
+      }
+
+      if (keysInput) {
+          this.simulateInput(keysInput, keys, true); 
+          this.simulateEnter(keysInput);
+          console.log("Adobe: Found & Filled Keywords");
+      } else {
+          console.warn("Adobe: Không tìm thấy ô Keywords");
+      }
     } 
     else if (this.currentSite === 'shutterstock') {
       const descInput = await this.waitForElement('div[data-testid="description"] textarea', 2000) ||
@@ -406,10 +445,7 @@ class KeywordGenerator {
       let thumbnailSrc = "";
 
       if (this.currentSite === 'adobe') { item.click(); thumbnailSrc = item.querySelector('img').src; } 
-      else { 
-          item.click(); 
-          thumbnailSrc = item.src; 
-      }
+      else { item.click(); thumbnailSrc = item.src; }
 
       await new Promise(r => setTimeout(r, 2000));
 
