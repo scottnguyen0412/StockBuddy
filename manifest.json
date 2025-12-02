@@ -25,9 +25,10 @@
     "content_scripts": [
       {
         "matches": [
-          "*://*.stock.adobe.com/*"
+          "*://*.stock.adobe.com/*",
+          "*://*.shutterstock.com/*"
         ],
-        "js": ["content-script.js"],
+        "js": ["content.js"],
         "css": ["popup.css"],
         "run_at": "document_end"
       }
