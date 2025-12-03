@@ -74,232 +74,265 @@ class KeywordGenerator {
   }
 
   injectStyles() {
-    const style = document.createElement("style");
-    const primaryColor = this.currentSite === "adobe" ? "#0061FE" : "#E11D48";
-    const shadowSoft = "0 10px 40px -10px rgba(0,0,0,0.15)";
-
+    const style = document.createElement('style');
+    
+    // Theme màu cho StockBuddy AI Button (Electric Style)
+    let mainGradient, glowColor;
+    if (this.currentSite === 'adobe') {
+        // Adobe: Electric Blue -> Neon Purple
+        mainGradient = 'linear-gradient(120deg, #2563EB, #7C3AED, #2563EB)';
+        glowColor = 'rgba(37, 99, 235, 0.5)';
+    } else {
+        // SS: Electric Red -> Hot Pink -> Orange
+        mainGradient = 'linear-gradient(120deg, #E11D48, #db2777, #f59e0b, #E11D48)';
+        glowColor = 'rgba(225, 29, 72, 0.5)';
+    }
+    
     style.textContent = `
       :root {
-        --sb-primary: ${primaryColor};
-        --sb-bg: #ffffff;
-        --sb-text: #1f2937;
-        --sb-text-light: #6b7280;
-        --sb-border: #e5e7eb;
-        --sb-input-bg: #f3f4f6;
-        --sb-radius: 12px;
-        --sb-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --sb-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
 
-      /* --- FLOATING BUTTON --- */
+      /* --- ANIMATIONS --- */
+      @keyframes sb-stream {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; } /* Chạy mượt mà liên tục */
+      }
+      @keyframes sb-float { 
+        0%, 100% { transform: translateX(-50%) translateY(0); } 
+        50% { transform: translateX(-50%) translateY(-5px); } 
+      }
+
+      /* --- FLOATING BUTTON (Electric Stream) --- */
       .sb-floating-btn {
-        position: fixed; bottom: 30px; left: 30px; z-index: 10000;
-        background: var(--sb-bg); color: var(--sb-text);
-        padding: 10px 16px; border-radius: 50px; cursor: pointer;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        font-family: var(--sb-font); font-weight: 600; font-size: 14px;
-        display: flex; align-items: center; gap: 10px;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(0,0,0,0.05); user-select: none;
+        position: fixed; 
+        bottom: 30px; left: 50%; transform: translateX(-50%);
+        z-index: 10000;
+        
+        /* Gradient đa sắc chạy liên tục */
+        background: ${mainGradient};
+        background-size: 200% auto;
+        animation: sb-stream 4s linear infinite, sb-float 5s ease-in-out infinite;
+        
+        color: white;
+        padding: 10px 24px 10px 14px;
+        display: flex; align-items: center; gap: 12px;
+        
+        /* Viền sáng nhẹ */
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50px;
+        
+        /* Shadow Glow lan tỏa */
+        box-shadow: 0 10px 25px -5px ${glowColor}, 0 0 10px rgba(255,255,255,0.2) inset;
+            
+        cursor: pointer;
+        font-family: var(--sb-font); font-weight: 700; font-size: 15px;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        user-select: none;
       }
-      .sb-floating-btn span { font-size: 18px; }
-      .sb-floating-btn:hover { 
-        transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        border-color: var(--sb-primary); color: var(--sb-primary);
-      }
-      .sb-floating-btn:active { transform: scale(0.96); }
 
-      /* --- INLINE BUTTON --- */
-      .sb-inline-btn {
-        margin-top: 12px; width: 100%; padding: 10px;
-        background: #FFF1F2; color: #E11D48; 
-        border: 1px solid #FECDD3; border-radius: 8px;
-        font-family: var(--sb-font); font-weight: 600; font-size: 13px;
-        cursor: pointer; transition: all 0.2s;
-        display: flex; justify-content: center; align-items: center; gap: 8px;
+      /* Hover: Sáng rực & Nổi lên */
+      .sb-floating-btn:hover {
+        transform: translateX(-50%) translateY(-6px) scale(1.05);
+        box-shadow: 0 20px 40px -10px ${glowColor}, 0 0 0 3px rgba(255,255,255,0.3);
+        filter: brightness(1.1);
       }
-      .sb-inline-btn:hover { background: #E11D48; color: white; border-color: #E11D48; }
-      .sb-inline-btn:disabled { opacity: 0.7; cursor: wait; }
+      
+      .sb-floating-btn:active { transform: translateX(-50%) scale(0.96); }
 
-      /* --- MODAL --- */
-      .sb-modal-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
-        z-index: 10001; display: none; justify-content: center; align-items: center;
-        opacity: 0; transition: opacity 0.2s;
+      /* Drag Handle */
+      .sb-drag-handle {
+        padding: 4px 10px 4px 2px;
+        border-right: 1px solid rgba(255, 255, 255, 0.4);
+        display: flex; align-items: center;
+        color: rgba(255, 255, 255, 0.9);
+        cursor: grab;
       }
+      .sb-drag-handle:hover { color: white; }
+      .sb-drag-handle:active { cursor: grabbing; }
+
+      .sb-btn-content { display: flex; align-items: center; gap: 8px; }
+      .sb-logo-text { text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+
+      /* --- MODAL (Clean Light) --- */
+      .sb-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 10001; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s; }
       .sb-modal-overlay.active { display: flex; opacity: 1; }
       
-      .sb-modal {
-        background: var(--sb-bg); width: 400px; border-radius: 20px;
-        box-shadow: ${shadowSoft}; font-family: var(--sb-font);
-        transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        overflow: hidden; border: 1px solid rgba(255,255,255,0.5);
+      .sb-modal { 
+        background: #fff; width: 440px; border-radius: 24px; 
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); 
+        font-family: var(--sb-font); transform: scale(0.95); transition: transform 0.2s; 
+        overflow: hidden;
       }
       .sb-modal-overlay.active .sb-modal { transform: scale(1); }
       
-      .sb-header { 
-        padding: 20px 24px; border-bottom: 1px solid var(--sb-border);
-        display: flex; justify-content: space-between; align-items: center;
-        background: rgba(249,250,251, 0.5);
-      }
-      .sb-title { font-size: 18px; font-weight: 700; color: #111; margin: 0; display: flex; align-items: center; gap: 8px; }
-      .sb-close { 
-        cursor: pointer; width: 32px; height: 32px; border-radius: 50%; 
-        display: flex; align-items: center; justify-content: center;
-        color: #999; transition: all 0.2s; background: transparent;
-      }
-      .sb-close:hover { background: #f3f4f6; color: #333; }
+      .sb-header { padding: 20px 28px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+      .sb-title { font-size: 18px; font-weight: 800; color: #111; margin: 0; display: flex; align-items: center; gap: 8px; }
+      .sb-close { cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #999; background: #f3f4f6; transition: all 0.2s; }
+      .sb-close:hover { background: #e5e7eb; color: #111; }
       
-      .sb-body { padding: 24px; }
-
-      /* --- FORMS --- */
-      .sb-form-group { margin-bottom: 20px; position: relative; }
-      .sb-label { 
-        display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; 
-        color: var(--sb-text-light); margin-bottom: 8px; letter-spacing: 0.5px;
-      }
+      .sb-body { padding: 28px; }
+      
+      /* Input style */
+      .sb-label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #4b5563; margin-bottom: 8px; letter-spacing: 0.5px; }
       .sb-input-wrapper { position: relative; }
-      .sb-input { 
-        width: 100%; padding: 12px 12px 12px 40px; background: var(--sb-input-bg);
-        border: 2px solid transparent; border-radius: 10px; 
-        font-size: 14px; color: var(--sb-text);
-        transition: all 0.2s; box-sizing: border-box;
-      }
-      .sb-input:focus { 
-        background: #fff; border-color: var(--sb-primary); 
-        box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1); outline: none; 
-      }
-      .sb-icon-key {
-        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-        color: #9CA3AF; pointer-events: none;
-      }
-
-      .sb-checkbox-group { 
-        display: flex; align-items: center; gap: 12px; margin-bottom: 24px; 
-        padding: 12px; border-radius: 10px; border: 1px solid var(--sb-border);
-        cursor: pointer; transition: background 0.2s;
-      }
-      .sb-checkbox-group:hover { background: #f9fafb; }
-      .sb-checkbox-group input { width: 18px; height: 18px; accent-color: var(--sb-primary); }
-      .sb-checkbox-text { font-size: 14px; font-weight: 500; color: var(--sb-text); }
-
-      /* --- ACTIONS --- */
-      .sb-btn { 
-        width: 100%; padding: 14px; border: none; border-radius: 12px; cursor: pointer; 
-        font-weight: 600; font-size: 14px;
-        transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
-      }
-      .sb-btn:active { transform: scale(0.98); }
+      .sb-input { width: 100%; padding: 14px 14px 14px 40px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 14px; color: #1f2937; transition: all 0.2s; box-sizing: border-box; }
+      .sb-input:focus { background: #fff; border-color: #2563EB; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); outline: none; }
+      .sb-icon-key { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 16px; }
       
+      /* --- SAVE BUTTON (NEW MODERN STYLE) --- */
       .sb-btn-save { 
-        background: #fff; color: var(--sb-text); border: 1px solid var(--sb-border); margin-top: 8px;
-        font-size: 13px; padding: 10px;
+        width: 100%; padding: 14px; border: none; border-radius: 12px; 
+        /* Gradient Xanh Mint hiện đại */
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white; cursor: pointer; margin-top: 16px; 
+        font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+        transition: all 0.2s; 
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        display: flex; justify-content: center; align-items: center; gap: 8px;
       }
-      .sb-btn-save:hover { background: #f9fafb; border-color: #d1d5db; }
+      .sb-btn-save:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); 
+        filter: brightness(1.05);
+      }
+      .sb-btn-save:active { transform: scale(0.98); }
+
+      /* --- CHECKBOX GROUP (Cải thiện layout) --- */
+      .sb-checkbox-group { 
+        display: flex; align-items: center; gap: 12px; 
+        margin-top: 24px; /* Tăng khoảng cách với nút Save */
+        margin-bottom: 24px; 
+        padding: 16px; border-radius: 12px; 
+        background: #f9fafb; border: 1px solid #e5e7eb; 
+        cursor: pointer; transition: all 0.2s; 
+      }
+      .sb-checkbox-group:hover { background: #fff; border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+      .sb-checkbox-group input { width: 18px; height: 18px; accent-color: #2563EB; cursor: pointer; }
+      .sb-checkbox-text { font-size: 14px; font-weight: 600; color: #374151; }
 
       .sb-divider { 
-        height: 1px; background: var(--sb-border); margin: 24px 0; position: relative; 
+        height: 1px; background: #e5e7eb; margin: 28px 0; position: relative; 
       }
-      .sb-divider::after {
-        content: 'ACTIONS'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-        background: white; padding: 0 10px; color: #9CA3AF; font-size: 11px; font-weight: 600;
+      .sb-divider::after { 
+        content: 'BẮT ĐẦU XỬ LÝ'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
+        background: #fff; padding: 0 12px; color: #9ca3af; font-size: 11px; font-weight: 800; letter-spacing: 1px; 
       }
 
-      .sb-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      /* Buttons Grid (Card Style Light) */
+      .sb-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
 
-      .sb-btn-primary { 
-        background: var(--sb-primary); color: white; 
-        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+      .sb-btn-big {
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 16px;
+        padding: 20px; cursor: pointer; text-align: left;
+        display: flex; flex-direction: column; gap: 12px;
+        transition: all 0.25s; position: relative; overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
       }
-      .sb-btn-primary:hover { filter: brightness(1.1); box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35); }
+      .sb-btn-big:hover { transform: translateY(-4px); box-shadow: 0 15px 30px -5px rgba(0,0,0,0.08); border-color: transparent; }
 
-      .sb-btn-dark { 
-        background: #111827; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      .sb-big-icon-wrap {
+        width: 42px; height: 42px; border-radius: 12px; background: #f3f4f6;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px; transition: all 0.2s; color: #666;
       }
-      .sb-btn-dark:hover { background: #000; }
+      .sb-big-title { color: #111; font-size: 15px; font-weight: 700; }
+      .sb-big-desc { color: #6b7280; font-size: 12px; margin-top: 2px; }
+
+      /* Single Button Hover */
+      .sb-btn-single:hover .sb-big-icon-wrap { background: #2563EB; color: white; transform: rotate(-5deg) scale(1.1); box-shadow: 0 5px 15px -5px rgba(37, 99, 235, 0.5); }
       
-      .sb-btn-stop { background: #F59E0B; color: white; width: 100%; }
+      /* Batch Button Hover */
+      .sb-btn-batch:hover .sb-big-icon-wrap { background: #F59E0B; color: white; transform: rotate(5deg) scale(1.1); box-shadow: 0 5px 15px -5px rgba(245, 158, 11, 0.5); }
+      
+      .sb-btn-stop { width: 100%; padding: 14px; border-radius: 12px; border:none; background: #EF4444; color: white; cursor:pointer; font-weight:700; margin-top:10px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+      .sb-btn-stop:hover { background: #DC2626; transform: translateY(-2px); }
 
-      /* --- PROGRESS BAR --- */
-      .sb-progress-container {
-        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
-        width: 320px; background: rgba(30, 30, 30, 0.9); backdrop-filter: blur(10px);
-        padding: 16px 20px; border-radius: 50px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 10002;
-        display: none; opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        color: white; text-align: center;
-      }
+      /* Progress & Toast */
+      .sb-progress-container { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); width: 340px; background: rgba(255, 255, 255, 0.95); border: 1px solid white; padding: 16px 24px; border-radius: 20px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.15); z-index: 10002; display: none; opacity: 0; transition: all 0.3s; color: #333; text-align: center; backdrop-filter: blur(10px); }
       .sb-progress-container.active { display: block; opacity: 1; transform: translateX(-50%) translateY(0); }
-      .sb-progress-info { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: #ccc; }
-      .sb-progress-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; }
-      .sb-progress-bar-fill { height: 100%; background: #10B981; width: 0%; transition: width 0.3s ease; box-shadow: 0 0 10px #10B981; }
+      .sb-progress-info { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: #555; font-weight: 600; }
+      .sb-progress-bar-bg { width: 100%; height: 6px; background: #e5e7eb; border-radius: 10px; overflow: hidden; }
+      .sb-progress-bar-fill { height: 100%; background: linear-gradient(90deg, #2563EB, #7C3AED); width: 0%; transition: width 0.3s ease; border-radius: 10px; }
 
-      /* --- TOAST --- */
-      .sb-toast { 
-        position: fixed; top: 24px; right: 24px; z-index: 10005; 
-        padding: 14px 20px; border-radius: 12px; color: #fff; font-weight: 500;
-        font-family: var(--sb-font); animation: sbSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: 0 10px 30px -5px rgba(0,0,0,0.2);
-        display: flex; align-items: center; gap: 10px; font-size: 14px;
-      }
+      .sb-toast { position: fixed; top: 24px; right: 24px; z-index: 10005; padding: 14px 20px; border-radius: 12px; color: #fff; font-weight: 600; font-family: var(--sb-font); animation: sbSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 10px 30px -5px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; font-size: 14px; border: 1px solid rgba(255,255,255,0.2); }
       .sb-toast.success { background: #10B981; }
       .sb-toast.error { background: #EF4444; }
       .sb-toast.info { background: #3B82F6; }
-      .sb-toast.warning { background: #F59E0B; }
-      
       @keyframes sbSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-      .sb-spinner {
-        width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 50%; border-top-color: white; animation: sbSpin 0.8s linear infinite;
-      }
+      .sb-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: sbSpin 0.8s linear infinite; }
       @keyframes sbSpin { to { transform: rotate(360deg); } }
-      .sb-highlight-img { outline: 4px solid var(--sb-primary) !important; outline-offset: -4px; transition: outline 0.3s; }
+      .sb-highlight-img { outline: 4px solid #2563EB !important; outline-offset: -4px; transition: outline 0.3s; box-shadow: 0 0 0 4px rgba(255,255,255,0.5) inset; }
+      .sb-inline-btn { margin-top: 12px; width: 100%; padding: 10px; background: #fff; color: #E11D48; border: 1px solid #FECDD3; border-radius: 8px; font-family: var(--sb-font); font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+      .sb-inline-btn:hover { background: #E11D48; color: white; transform: translateY(-1px); box-shadow: 0 5px 15px rgba(225, 29, 72, 0.25); }
     `;
-
-    if (this.currentSite === "adobe") {
-      style.textContent = style.textContent
-        .replace("--sb-primary: #E11D48;", "--sb-primary: #0061FE;")
-        .replace("rgba(225, 29, 72", "rgba(0, 97, 254");
-    }
+    
     document.head.appendChild(style);
   }
 
   createFloatingButton() {
-    const btn = document.createElement("div");
-    btn.className = "sb-floating-btn";
-    btn.innerHTML = "<span>⚡</span> AI Tools";
-
+    const btn = document.createElement('div');
+    btn.className = 'sb-floating-btn';
+    
+    btn.innerHTML = `
+      <div class="sb-drag-handle" title="Kéo để di chuyển">
+        <svg viewBox="0 0 10 16" width="10" height="16" fill="currentColor">
+          <circle cx="2" cy="2" r="1.5" opacity="0.4"/> <circle cx="8" cy="2" r="1.5" opacity="0.4"/>
+          <circle cx="2" cy="8" r="1.5" opacity="0.4"/> <circle cx="8" cy="8" r="1.5" opacity="0.4"/>
+          <circle cx="2" cy="14" r="1.5" opacity="0.4"/> <circle cx="8" cy="14" r="1.5" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="sb-btn-content">
+        <span style="font-size: 22px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🤖</span> 
+        <span class="sb-logo-text">StockBuddy AI</span>
+      </div>
+    `;
+    
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
 
-    btn.addEventListener("mousedown", (e) => {
+    btn.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
       const rect = btn.getBoundingClientRect();
       initialLeft = rect.left;
       initialTop = rect.top;
-      btn.style.bottom = "auto";
-      btn.style.right = "auto";
-      btn.style.transition = "none";
+      
+      btn.style.bottom = 'auto'; 
+      btn.style.right = 'auto';
+      btn.style.left = `${initialLeft}px`;
+      btn.style.top = `${initialTop}px`;
+      btn.style.transform = 'none'; // Tắt animation float và center khi kéo
+      btn.style.animation = 'none';
+      
+      btn.style.transition = 'none'; 
+      btn.style.cursor = 'grabbing';
     });
-
-    document.addEventListener("mousemove", (e) => {
+    
+    document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
+      e.preventDefault();
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
       btn.style.left = `${initialLeft + dx}px`;
       btn.style.top = `${initialTop + dy}px`;
     });
 
-    document.addEventListener("mouseup", () => {
-      if (isDragging) {
+    document.addEventListener('mouseup', () => {
+      if(isDragging) {
         isDragging = false;
-        btn.style.transition = "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)";
+        btn.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; 
+        btn.style.cursor = 'pointer';
+        // Khôi phục animation float nhẹ khi thả ra (optional, nhưng cần cẩn thận với transform)
+        // Ở đây ta không khôi phục animation để tránh nút bị nhảy vị trí
       }
     });
 
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener('click', (e) => {
+      if (e.target.closest('.sb-drag-handle')) return;
       if (!isDragging) this.openModal();
     });
 
@@ -346,14 +379,14 @@ class KeywordGenerator {
   }
 
   createMainModal() {
-    const overlay = document.createElement("div");
-    overlay.className = "sb-modal-overlay";
-
+    const overlay = document.createElement('div');
+    overlay.className = 'sb-modal-overlay';
+    
     overlay.innerHTML = `
       <div class="sb-modal">
         <div class="sb-header">
           <h3 class="sb-title">
-            <span style="font-size: 20px;">🤖</span> StockBuddy <span style="font-weight:400; color:#999; font-size:14px; margin-left:5px;">v2.0 Fixed</span>
+            <span>✨</span> StockBuddy <span style="font-weight:400; color:#888; font-size:14px; margin-left:5px;">AI v2.0.0</span>
           </h3>
           <div class="sb-close">&times;</div>
         </div>
@@ -363,54 +396,53 @@ class KeywordGenerator {
             <label class="sb-label">Gemini API Key</label>
             <div class="sb-input-wrapper">
               <span class="sb-icon-key">🔑</span>
-              <input type="password" id="sb-api-key" class="sb-input" placeholder="Paste your API key here...">
+              <input type="password" id="sb-api-key" class="sb-input" placeholder="Nhập khóa API của bạn...">
             </div>
-            <button id="sb-save-settings" class="sb-btn sb-btn-save">Lưu cấu hình</button>
+            <button id="sb-save-settings" class="sb-btn-save">
+              <span>💾</span> Lưu thiết lập
+            </button>
           </div>
 
           <label class="sb-checkbox-group" for="sb-skip-filled">
             <input type="checkbox" id="sb-skip-filled" checked>
-            <span class="sb-checkbox-text">Bỏ qua ảnh đã điền (Skip filled)</span>
+            <span class="sb-checkbox-text">Bỏ qua các ảnh đã có nội dung</span>
           </label>
 
           <div class="sb-divider"></div>
 
           <div class="sb-actions-grid" id="sb-start-actions">
-            <button id="sb-run-single" class="sb-btn sb-btn-primary">
-              ⚡ Single
+            <button id="sb-run-single" class="sb-btn-big sb-btn-single">
+              <div class="sb-big-icon-wrap">⚡</div>
+              <div>
+                <div class="sb-big-title">Xử lý 1 ảnh</div>
+                <div class="sb-big-desc">Phân tích ảnh đang chọn</div>
+              </div>
             </button>
-            <button id="sb-run-batch" class="sb-btn sb-btn-dark">
-              📦 Batch All
+            
+            <button id="sb-run-batch" class="sb-btn-big sb-btn-batch">
+              <div class="sb-big-icon-wrap">📦</div>
+              <div>
+                <div class="sb-big-title">Chạy hàng loạt</div>
+                <div class="sb-big-desc">Tự động xử lý tất cả</div>
+              </div>
             </button>
           </div>
           
-          <button id="sb-stop-batch" class="sb-btn sb-btn-stop" style="display:none">
-            🛑 Dừng Batch (Stop)
+          <button id="sb-stop-batch" class="sb-btn-stop" style="display:none">
+            🛑 Dừng xử lý
           </button>
         </div>
       </div>
     `;
+    
+    const closeBtn = overlay.querySelector('.sb-close');
+    closeBtn.onclick = () => overlay.classList.remove('active');
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('active'); };
 
-    const closeBtn = overlay.querySelector(".sb-close");
-    closeBtn.onclick = () => overlay.classList.remove("active");
-    overlay.onclick = (e) => {
-      if (e.target === overlay) overlay.classList.remove("active");
-    };
-
-    overlay.querySelector("#sb-save-settings").onclick = () =>
-      this.saveSettings();
-    overlay.querySelector("#sb-run-single").onclick = () => {
-      overlay.classList.remove("active");
-      this.processSingleImage();
-    };
-    overlay.querySelector("#sb-run-batch").onclick = () => {
-      overlay.classList.remove("active");
-      this.startBatchProcessing();
-    };
-    overlay.querySelector("#sb-stop-batch").onclick = () => {
-      this.isBatchProcessing = false;
-      this.updateBatchButtonUI(false);
-    };
+    overlay.querySelector('#sb-save-settings').onclick = () => this.saveSettings();
+    overlay.querySelector('#sb-run-single').onclick = () => { overlay.classList.remove('active'); this.processSingleImage(); };
+    overlay.querySelector('#sb-run-batch').onclick = () => { overlay.classList.remove('active'); this.startBatchProcessing(); };
+    overlay.querySelector('#sb-stop-batch').onclick = () => { this.isBatchProcessing = false; this.updateBatchButtonUI(false); };
 
     document.body.appendChild(overlay);
     this.modal = overlay;
