@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "AI Stock Keywords Generator",
+    "name": "StockBuddy - AI Keywords Generator",
     "version": "2.0.0",
     "description": "Auto generate keywords and titles for Adobe Stock and Shutterstock using Gemini AI",
     "permissions": [

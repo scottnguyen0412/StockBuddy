@@ -3,203 +3,69 @@
 <head>
   <meta charset="utf-8">
   <link rel="stylesheet" type="text/css" href="popup.css">
-  <style>
-    body {
-      width: 350px;
-      padding: 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      margin: 0;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    .header h1 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-    }
-    
-    .api-section {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      backdrop-filter: blur(10px);
-    }
-    
-    .input-group {
-      margin-bottom: 15px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
-    input, select {
-      width: 100%;
-      padding: 8px;
-      border: none;
-      border-radius: 5px;
-      background: rgba(255, 255, 255, 0.9);
-      color: #333;
-      font-size: 12px;
-      box-sizing: border-box;
-    }
-    
-    input:focus, select:focus {
-      outline: none;
-      background: white;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-    }
-    
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 25px;
-      background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin: 5px 0;
-      font-size: 12px;
-    }
-    
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .btn-secondary {
-      background: linear-gradient(45deg, #4ecdc4, #44a08d);
-    }
-    
-    .status {
-      text-align: center;
-      padding: 10px;
-      border-radius: 5px;
-      margin: 10px 0;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
-    .status.success {
-      background: rgba(76, 175, 80, 0.2);
-      color: #4caf50;
-    }
-    
-    .status.error {
-      background: rgba(244, 67, 54, 0.2);
-      color: #f44336;
-    }
-    
-    .status.loading {
-      background: rgba(255, 193, 7, 0.2);
-      color: #ffc107;
-    }
-    
-    .settings {
-      font-size: 11px;
-    }
-    
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 40px;
-      height: 20px;
-      margin-left: 10px;
-    }
-    
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255,255,255,0.3);
-      transition: .4s;
-      border-radius: 20px;
-    }
-    
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 2px;
-      bottom: 2px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-    
-    input:checked + .slider {
-      background-color: #4caf50;
-    }
-    
-    input:checked + .slider:before {
-      transform: translateX(20px);
-    }
-  </style>
-  <script src="popup.js"></script>
 </head>
-<body>
-  <div class="header">
-    <h1>🎨 AI Keywords Generator</h1>
-  </div>
+<body class="sb-app">
   
-  <div class="api-section">
-    <div class="input-group">
-      <label for="apiKey">Gemini API Key:</label>
-      <input type="password" id="apiKey" placeholder="Nhập API key của bạn">
+  <div class="sb-container">
+    <div class="header">
+      <div class="logo-icon">🤖</div>
+      <div class="title-group">
+        <h1>StockBuddy <span class="highlight">AI</span></h1>
+        <p class="subtitle">Trợ lý từ khóa thông minh</p>
+      </div>
     </div>
     
-    <div class="input-group">
-      <label for="language">Ngôn ngữ keywords:</label>
-      <select id="language">
-        <option value="en">English</option>
-        <option value="vi">Tiếng Việt</option>
-        <option value="both">Cả hai</option>
-      </select>
-    </div>
-    
-    <div class="input-group settings">
-      <label>
-        Auto-detect images
-        <label class="switch">
+    <div class="card">
+      
+      <div class="input-group">
+        <label for="apiKey">Gemini API Key</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="apiKey" placeholder="Dán API Key vào đây...">
+        </div>
+      </div>
+      
+      <div class="input-group">
+        <label for="language">Ngôn ngữ đầu ra</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🌐</span>
+          <select id="language">
+            <option value="en">🇬🇧 English (Mặc định)</option>
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="both">🌍 Song ngữ (Anh - Việt)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          <span class="setting-icon">⚡</span>
+          <div>
+            <span class="label-text">Tự động phát hiện ảnh</span>
+            <span class="label-desc">Hiện nút AI khi vào trang ảnh</span>
+          </div>
+        </div>
+        <label class="toggle-switch">
           <input type="checkbox" id="autoDetect" checked>
           <span class="slider"></span>
         </label>
-      </label>
+      </div>
+
+    </div>
+    
+    <button class="btn-primary" id="saveSettings">
+      <span>💾 Lưu cài đặt</span>
+    </button>
+    
+    <div id="status" class="status" style="display: none;"></div>
+
+    <div class="footer">
+      Made with ❤️ by Khoi Nguyen
     </div>
   </div>
-  
-  <button class="btn" id="saveSettings">💾 Lưu cài đặt</button>
-  
-  <div id="status" class="status" style="display: none;"></div>
-  
+
   <script src="popup.js"></script>
 </body>
 </html>
