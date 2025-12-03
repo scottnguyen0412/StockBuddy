@@ -11,9 +11,9 @@ class KeywordGenerator {
 
   detectSite() {
     const hostname = window.location.hostname;
-    if (hostname.includes('adobe.com')) return 'adobe';
-    if (hostname.includes('shutterstock.com')) return 'shutterstock';
-    return 'unknown';
+    if (hostname.includes("adobe.com")) return "adobe";
+    if (hostname.includes("shutterstock.com")) return "shutterstock";
+    return "unknown";
   }
 
   init() {
@@ -29,24 +29,29 @@ class KeywordGenerator {
     this.observer = new MutationObserver((mutations) => {
       this.injectInlineButton();
     });
-    
+
     this.observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
   }
 
   // --- UPDATED: Sửa vị trí nút Inline cho Shutterstock ---
   injectInlineButton() {
-    if (this.currentSite !== 'shutterstock') return;
+    if (this.currentSite !== "shutterstock") return;
 
     // Selector chuẩn xác dựa trên HTML bạn cung cấp
-    const descContainer = document.querySelector('div[data-testid="description"]');
+    const descContainer = document.querySelector(
+      'div[data-testid="description"]'
+    );
 
     // Chỉ chèn nếu chưa có nút
-    if (descContainer && !descContainer.parentNode.querySelector('.sb-inline-btn')) {
-      const btn = document.createElement('button');
-      btn.className = 'sb-inline-btn';
+    if (
+      descContainer &&
+      !descContainer.parentNode.querySelector(".sb-inline-btn")
+    ) {
+      const btn = document.createElement("button");
+      btn.className = "sb-inline-btn";
       btn.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7m4 0h6m-3-3v6"/>
@@ -54,13 +59,13 @@ class KeywordGenerator {
         Auto Fill
       `;
       btn.title = "Tự động điền Description & Keywords";
-      
+
       btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (this.isSingleProcessing) return;
         // Truyền null để hàm findActiveImage tự đi tìm ảnh gốc
-        this.processSingleImage(null, btn); 
+        this.processSingleImage(null, btn);
       };
 
       // Chèn nút vào SAU container description để giao diện đẹp hơn
@@ -69,10 +74,10 @@ class KeywordGenerator {
   }
 
   injectStyles() {
-    const style = document.createElement('style');
-    const primaryColor = this.currentSite === 'adobe' ? '#0061FE' : '#E11D48';
-    const shadowSoft = '0 10px 40px -10px rgba(0,0,0,0.15)';
-    
+    const style = document.createElement("style");
+    const primaryColor = this.currentSite === "adobe" ? "#0061FE" : "#E11D48";
+    const shadowSoft = "0 10px 40px -10px rgba(0,0,0,0.15)";
+
     style.textContent = `
       :root {
         --sb-primary: ${primaryColor};
@@ -250,34 +255,36 @@ class KeywordGenerator {
       @keyframes sbSpin { to { transform: rotate(360deg); } }
       .sb-highlight-img { outline: 4px solid var(--sb-primary) !important; outline-offset: -4px; transition: outline 0.3s; }
     `;
-    
-    if (this.currentSite === 'adobe') {
-       style.textContent = style.textContent.replace('--sb-primary: #E11D48;', '--sb-primary: #0061FE;').replace('rgba(225, 29, 72', 'rgba(0, 97, 254');
+
+    if (this.currentSite === "adobe") {
+      style.textContent = style.textContent
+        .replace("--sb-primary: #E11D48;", "--sb-primary: #0061FE;")
+        .replace("rgba(225, 29, 72", "rgba(0, 97, 254");
     }
     document.head.appendChild(style);
   }
 
   createFloatingButton() {
-    const btn = document.createElement('div');
-    btn.className = 'sb-floating-btn';
-    btn.innerHTML = '<span>⚡</span> AI Tools';
-    
+    const btn = document.createElement("div");
+    btn.className = "sb-floating-btn";
+    btn.innerHTML = "<span>⚡</span> AI Tools";
+
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
 
-    btn.addEventListener('mousedown', (e) => {
+    btn.addEventListener("mousedown", (e) => {
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
       const rect = btn.getBoundingClientRect();
       initialLeft = rect.left;
       initialTop = rect.top;
-      btn.style.bottom = 'auto'; 
-      btn.style.right = 'auto';
-      btn.style.transition = 'none'; 
+      btn.style.bottom = "auto";
+      btn.style.right = "auto";
+      btn.style.transition = "none";
     });
 
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener("mousemove", (e) => {
       if (!isDragging) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
@@ -285,14 +292,14 @@ class KeywordGenerator {
       btn.style.top = `${initialTop + dy}px`;
     });
 
-    document.addEventListener('mouseup', () => {
-      if(isDragging) {
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
         isDragging = false;
-        btn.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'; 
+        btn.style.transition = "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)";
       }
     });
 
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener("click", (e) => {
       if (!isDragging) this.openModal();
     });
 
@@ -300,8 +307,8 @@ class KeywordGenerator {
   }
 
   createProgressUI() {
-    const div = document.createElement('div');
-    div.className = 'sb-progress-container';
+    const div = document.createElement("div");
+    div.className = "sb-progress-container";
     div.innerHTML = `
       <div class="sb-progress-info">
         <span id="sb-progress-text">Đang xử lý...</span>
@@ -317,31 +324,31 @@ class KeywordGenerator {
 
   updateProgress(current, total, message = null) {
     if (!this.progressBar) return;
-    this.progressBar.classList.add('active');
-    
-    const textEl = document.getElementById('sb-progress-text');
-    const percentEl = document.getElementById('sb-progress-percent');
-    
+    this.progressBar.classList.add("active");
+
+    const textEl = document.getElementById("sb-progress-text");
+    const percentEl = document.getElementById("sb-progress-percent");
+
     if (message) textEl.textContent = message;
     else textEl.textContent = `Processing image ${current} of ${total}`;
 
     const percent = Math.round((current / total) * 100);
-    const fillEl = document.getElementById('sb-progress-fill');
-    
+    const fillEl = document.getElementById("sb-progress-fill");
+
     fillEl.style.width = `${percent}%`;
     percentEl.textContent = `${percent}%`;
   }
 
   hideProgress() {
     if (this.progressBar) {
-        this.progressBar.classList.remove('active');
+      this.progressBar.classList.remove("active");
     }
   }
 
   createMainModal() {
-    const overlay = document.createElement('div');
-    overlay.className = 'sb-modal-overlay';
-    
+    const overlay = document.createElement("div");
+    overlay.className = "sb-modal-overlay";
+
     overlay.innerHTML = `
       <div class="sb-modal">
         <div class="sb-header">
@@ -384,66 +391,83 @@ class KeywordGenerator {
       </div>
     `;
 
-    const closeBtn = overlay.querySelector('.sb-close');
-    closeBtn.onclick = () => overlay.classList.remove('active');
-    overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('active'); };
+    const closeBtn = overlay.querySelector(".sb-close");
+    closeBtn.onclick = () => overlay.classList.remove("active");
+    overlay.onclick = (e) => {
+      if (e.target === overlay) overlay.classList.remove("active");
+    };
 
-    overlay.querySelector('#sb-save-settings').onclick = () => this.saveSettings();
-    overlay.querySelector('#sb-run-single').onclick = () => { overlay.classList.remove('active'); this.processSingleImage(); };
-    overlay.querySelector('#sb-run-batch').onclick = () => { overlay.classList.remove('active'); this.startBatchProcessing(); };
-    overlay.querySelector('#sb-stop-batch').onclick = () => { this.isBatchProcessing = false; this.updateBatchButtonUI(false); };
+    overlay.querySelector("#sb-save-settings").onclick = () =>
+      this.saveSettings();
+    overlay.querySelector("#sb-run-single").onclick = () => {
+      overlay.classList.remove("active");
+      this.processSingleImage();
+    };
+    overlay.querySelector("#sb-run-batch").onclick = () => {
+      overlay.classList.remove("active");
+      this.startBatchProcessing();
+    };
+    overlay.querySelector("#sb-stop-batch").onclick = () => {
+      this.isBatchProcessing = false;
+      this.updateBatchButtonUI(false);
+    };
 
     document.body.appendChild(overlay);
     this.modal = overlay;
   }
 
   async openModal() {
-    const { apiKey } = await chrome.storage.sync.get(['apiKey']);
-    if (apiKey) document.getElementById('sb-api-key').value = apiKey;
+    const { apiKey } = await chrome.storage.sync.get(["apiKey"]);
+    if (apiKey) document.getElementById("sb-api-key").value = apiKey;
     this.updateBatchButtonUI(this.isBatchProcessing);
-    this.modal.classList.add('active');
+    this.modal.classList.add("active");
   }
 
   async saveSettings() {
-    const apiKey = document.getElementById('sb-api-key').value.trim();
-    if (!apiKey) { this.showToast("Vui lòng nhập API Key!", "error"); return; }
+    const apiKey = document.getElementById("sb-api-key").value.trim();
+    if (!apiKey) {
+      this.showToast("Vui lòng nhập API Key!", "error");
+      return;
+    }
     await chrome.storage.sync.set({ apiKey });
-    
-    const btn = document.getElementById('sb-save-settings');
+
+    const btn = document.getElementById("sb-save-settings");
     const oldText = btn.textContent;
     btn.textContent = "✅ Đã lưu!";
     btn.style.color = "green";
     btn.style.borderColor = "green";
     setTimeout(() => {
-        btn.textContent = oldText;
-        btn.style.color = "";
-        btn.style.borderColor = "";
+      btn.textContent = oldText;
+      btn.style.color = "";
+      btn.style.borderColor = "";
     }, 2000);
   }
-  
+
   updateBatchButtonUI(isRunning) {
-      const actionsGrid = document.getElementById('sb-start-actions');
-      const stopBtn = document.getElementById('sb-stop-batch');
-      
-      if (isRunning) { 
-          actionsGrid.style.display = 'none'; 
-          stopBtn.style.display = 'flex'; 
-      } else { 
-          actionsGrid.style.display = 'grid'; 
-          stopBtn.style.display = 'none'; 
-      }
+    const actionsGrid = document.getElementById("sb-start-actions");
+    const stopBtn = document.getElementById("sb-stop-batch");
+
+    if (isRunning) {
+      actionsGrid.style.display = "none";
+      stopBtn.style.display = "flex";
+    } else {
+      actionsGrid.style.display = "grid";
+      stopBtn.style.display = "none";
+    }
   }
 
-  showToast(message, type = 'info') {
-    const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
-    const toast = document.createElement('div');
+  showToast(message, type = "info") {
+    const icons = { success: "✅", error: "❌", info: "ℹ️", warning: "⚠️" };
+    const toast = document.createElement("div");
     toast.className = `sb-toast ${type}`;
-    toast.innerHTML = `<span style="font-size:18px">${icons[type] || ''}</span> ${message}`;
+    toast.innerHTML = `<span style="font-size:18px">${
+      icons[type] || ""
+    }</span> ${message}`;
     document.body.appendChild(toast);
     setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(-20px)';
-        setTimeout(() => toast.remove(), 300);
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(-20px)";
+      setTimeout(() => toast.remove(), 300);
     }, 4000);
   }
 
@@ -452,16 +476,27 @@ class KeywordGenerator {
             1. A compelling title (max 200 chars, suitable for stock photography).
                IMPORTANT: Do NOT include any personal names, photographer names, or "By [Name]".
                IMPORTANT: Do NOT use special characters like "&", "|", or single quotes (') in the title. Keep it clean text.
-            2. 30-50 relevant keywords separated by commas.
+            2. 30-45 relevant keywords separated by commas.
             Make it SEO-friendly and descriptive. Format as JSON:
             {
               "title": "Title here",
               "keywords": "keyword1, keyword2, ..."
             }`;
-    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+    const url =
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
     const response = await fetch(url, {
-      method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: "image/jpeg", data: base64 } },
+            ],
+          },
+        ],
+      }),
     });
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
     const data = await response.json();
@@ -475,30 +510,45 @@ class KeywordGenerator {
   simulateInput(element, value, shouldBlur = true) {
     if (!element) return;
     element.focus();
-    
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-    const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
 
-    if (element.tagName.toLowerCase() === 'textarea' && nativeTextAreaValueSetter) {
-        nativeTextAreaValueSetter.call(element, value);
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value"
+    ).set;
+    const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLTextAreaElement.prototype,
+      "value"
+    ).set;
+
+    if (
+      element.tagName.toLowerCase() === "textarea" &&
+      nativeTextAreaValueSetter
+    ) {
+      nativeTextAreaValueSetter.call(element, value);
     } else if (nativeInputValueSetter) {
-        nativeInputValueSetter.call(element, value);
+      nativeInputValueSetter.call(element, value);
     } else {
-        element.value = value;
+      element.value = value;
     }
 
-    element.dispatchEvent(new Event('input', { bubbles: true }));
-    element.dispatchEvent(new Event('change', { bubbles: true })); // Thêm event change
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true })); // Thêm event change
     if (shouldBlur) element.blur();
   }
 
   simulateEnter(element) {
     if (!element) return;
     element.focus();
-    const options = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true };
-    element.dispatchEvent(new KeyboardEvent('keydown', options));
-    element.dispatchEvent(new KeyboardEvent('keypress', options));
-    element.dispatchEvent(new KeyboardEvent('keyup', options));
+    const options = {
+      key: "Enter",
+      code: "Enter",
+      keyCode: 13,
+      which: 13,
+      bubbles: true,
+    };
+    element.dispatchEvent(new KeyboardEvent("keydown", options));
+    element.dispatchEvent(new KeyboardEvent("keypress", options));
+    element.dispatchEvent(new KeyboardEvent("keyup", options));
   }
 
   findElementBySelectors(selectors) {
@@ -510,49 +560,68 @@ class KeywordGenerator {
   }
 
   hasExistingData() {
-    if (this.currentSite === 'adobe') {
-       const titleSelectors = ["textarea.title-input", 'input[data-testid="title"]', 'textarea[data-testid="title"]', 'input[name="title"]', '[placeholder*="title" i]'];
-       const titleInput = this.findElementBySelectors(titleSelectors);
-       
-       const keywordSelectors = ["textarea[name=keywordsUITextArea]", 'textarea.keywords-input', 'input[name="keywords"]'];
-       const keysInput = this.findElementBySelectors(keywordSelectors);
+    if (this.currentSite === "adobe") {
+      const titleSelectors = [
+        "textarea.title-input",
+        'input[data-testid="title"]',
+        'textarea[data-testid="title"]',
+        'input[name="title"]',
+        '[placeholder*="title" i]',
+      ];
+      const titleInput = this.findElementBySelectors(titleSelectors);
 
-       const hasTitle = titleInput && titleInput.value.trim().length > 3;
-       const hasKeys = keysInput && keysInput.value.trim().length > 3;
-       return hasTitle || hasKeys;
-    } 
-    else if (this.currentSite === 'shutterstock') {
-       const descInput = document.querySelector('textarea[name="description"]');
-       if (descInput && descInput.value.trim().length > 5) return true;
-       return false;
+      const keywordSelectors = [
+        "textarea[name=keywordsUITextArea]",
+        "textarea.keywords-input",
+        'input[name="keywords"]',
+      ];
+      const keysInput = this.findElementBySelectors(keywordSelectors);
+
+      const hasTitle = titleInput && titleInput.value.trim().length > 3;
+      const hasKeys = keysInput && keysInput.value.trim().length > 3;
+      return hasTitle || hasKeys;
+    } else if (this.currentSite === "shutterstock") {
+      const descInput = document.querySelector('textarea[name="description"]');
+      if (descInput && descInput.value.trim().length > 5) return true;
+      return false;
     }
     return false;
   }
 
   // --- UPDATED: Sửa logic tìm ảnh (Quan trọng) ---
   findActiveImage() {
-    if (this.currentSite === 'adobe') {
-      return document.querySelector('.infer-preview-image img') || 
-             document.querySelector('.upload-tile__wrapper.active img');
-    } 
-    
-    if (this.currentSite === 'shutterstock') {
+    if (this.currentSite === "adobe") {
+      return (
+        document.querySelector(".infer-preview-image img") ||
+        document.querySelector(".upload-tile__wrapper.active img")
+      );
+    }
+
+    if (this.currentSite === "shutterstock") {
       // 1. Ưu tiên tìm ảnh trong sidebar editor (dựa trên HTML bạn đưa)
-      const sidebarImg = document.querySelector('img[src*="pending_photos"][style*="max-height"]');
+      const sidebarImg = document.querySelector(
+        'img[src*="pending_photos"][style*="max-height"]'
+      );
       if (sidebarImg) return sidebarImg;
 
       // 2. Tìm trong grid item đang checked
-      const activeCardImg = document.querySelector('div[aria-checked="true"] img[data-testid^="card-media-"]');
+      const activeCardImg = document.querySelector(
+        'div[aria-checked="true"] img[data-testid^="card-media-"]'
+      );
       if (activeCardImg) return activeCardImg;
-      
+
       // 3. Tìm grid item đang focus
-      const focusedWrapper = document.querySelector('div[tabindex="0"] img[data-testid^="card-media-"]');
+      const focusedWrapper = document.querySelector(
+        'div[tabindex="0"] img[data-testid^="card-media-"]'
+      );
       if (focusedWrapper) return focusedWrapper;
 
       // 4. Nếu đang Single mode, có thể lấy ảnh đầu tiên trong danh sách grid làm fallback
       if (this.isSingleProcessing) {
-          const firstImg = document.querySelector('img[data-testid^="card-media-"]');
-          if (firstImg) return firstImg;
+        const firstImg = document.querySelector(
+          'img[data-testid^="card-media-"]'
+        );
+        if (firstImg) return firstImg;
       }
     }
     return null;
@@ -560,130 +629,221 @@ class KeywordGenerator {
 
   // --- PROCESS SINGLE IMAGE ---
   async processSingleImage(specificImgSrc = null, btnElement = null) {
-    if (this.isSingleProcessing) return;
+    console.log("🚀 [START] Bắt đầu hàm processSingleImage");
+
+    // FORCE RESET: Đặt lại trạng thái để tránh bị kẹt nếu lần trước lỗi
+    this.isSingleProcessing = false;
     this.isSingleProcessing = true;
 
-    let originalBtnText = '';
+    let originalBtnText = "";
     if (btnElement) {
-        originalBtnText = btnElement.innerHTML;
-        btnElement.innerHTML = '<div class="sb-spinner"></div>';
-        btnElement.disabled = true;
+      originalBtnText = btnElement.innerHTML;
+      btnElement.innerHTML = '<div class="sb-spinner"></div>';
+      btnElement.disabled = true;
     }
 
     let imgElement = null;
     let imgSrc = specificImgSrc;
 
     if (!imgSrc) {
-        imgElement = this.findActiveImage();
-        if (!imgElement) { 
-            this.showToast("Không tìm thấy ảnh đang chọn!", "error"); 
-            this.resetSingleState(btnElement, originalBtnText);
-            return; 
-        }
-        imgSrc = imgElement.src;
-        if (imgElement) {
-            imgElement.classList.add('sb-highlight-img');
-            setTimeout(() => imgElement.classList.remove('sb-highlight-img'), 1000);
-        }
+      imgElement = this.findActiveImage();
+      if (!imgElement) {
+        console.warn("⚠️ Không tìm thấy element ảnh nào active/checked");
+        this.showToast("Không tìm thấy ảnh đang chọn!", "error");
+        this.resetSingleState(btnElement, originalBtnText);
+        return;
+      }
+      imgSrc = imgElement.src;
+      console.log("📷 Tìm thấy ảnh gốc:", imgSrc);
+
+      if (imgElement) {
+        imgElement.classList.add("sb-highlight-img");
+        setTimeout(() => imgElement.classList.remove("sb-highlight-img"), 1000);
+      }
+    } else {
+      console.log("📷 Dùng ảnh từ tham số truyền vào:", imgSrc);
     }
 
     try {
       this.showToast("Gemini đang phân tích ảnh...", "info");
+
+      // 1. Gọi hàm tải ảnh (đã thêm log ở trên)
       const base64 = await this.urlToBase64(imgSrc);
-      const { apiKey } = await chrome.storage.sync.get(['apiKey']);
-      if (!apiKey) { 
-          this.showToast("Thiếu API Key!", "error"); 
-          this.openModal(); 
-          this.resetSingleState(btnElement, originalBtnText);
-          return; 
+
+      // 2. Kiểm tra API Key
+      const { apiKey } = await chrome.storage.sync.get(["apiKey"]);
+      if (!apiKey) {
+        console.error("🔑 Thiếu API Key");
+        this.showToast("Thiếu API Key!", "error");
+        this.openModal();
+        this.resetSingleState(btnElement, originalBtnText);
+        return;
       }
 
+      // console.log("🤖 [4] Đang gửi ảnh lên Gemini API...");
       const result = await this.callGeminiAPI(base64, apiKey);
+      // console.log("✨ [5] Gemini trả về kết quả:", result);
+
       await this.fillForms(result);
       this.showToast("Đã điền xong!", "success");
     } catch (e) {
-      console.error(e);
+      console.error("💥 [CRITICAL ERROR]:", e);
       this.showToast(`Lỗi: ${e.message}`, "error");
     } finally {
-        this.resetSingleState(btnElement, originalBtnText);
+      console.log("🏁 [END] Kết thúc quy trình");
+      this.resetSingleState(btnElement, originalBtnText);
     }
   }
 
   resetSingleState(btn, originalText) {
-      this.isSingleProcessing = false;
-      if (btn && originalText) {
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-      }
+    this.isSingleProcessing = false;
+    if (btn && originalText) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
   }
 
   async urlToBase64(url) {
-    // Xử lý vấn đề CORS nếu cần hoặc dùng fetch mode no-cors (tùy ngữ cảnh extension)
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(',')[1]);
-      reader.readAsDataURL(blob);
+    // console.log(`📡 [1] Đang gọi Background để tải ảnh: ${url.substring(0, 50)}...`);
+
+    return new Promise((resolve, reject) => {
+      try {
+        chrome.runtime.sendMessage(
+          { action: "fetchImageBase64", url: url },
+          (response) => {
+            // Kiểm tra lỗi kết nối extension
+            if (chrome.runtime.lastError) {
+              console.error(
+                "🔥 [Lỗi Kết Nối] Không gọi được Background. Bạn đã Reload Extension chưa?",
+                chrome.runtime.lastError
+              );
+              reject(new Error(chrome.runtime.lastError.message));
+              return;
+            }
+
+            if (response && response.success) {
+              // console.log(`✅ [2] Background đã trả về ảnh (Độ dài Base64: ${response.data.length})`);
+              resolve(response.data);
+            } else {
+              console.error("❌ [3] Background báo lỗi tải ảnh:", response);
+              reject(
+                new Error(
+                  response ? response.error : "Unknown error fetching image"
+                )
+              );
+            }
+          }
+        );
+      } catch (e) {
+        console.error("💥 Lỗi khi gửi message:", e);
+        reject(e);
+      }
     });
   }
 
-  // --- UPDATED: Sửa logic điền form cho SS ---
   async fillForms(data) {
-    const desc = data.title; 
-    const keys = data.keywords;
+    // console.log("🤖 StockBuddy Debug - Data nhận được:", data);
 
-    if (this.currentSite === 'adobe') {
-      const titleSelectors = ["textarea.title-input", 'input[data-testid="title"]', 'textarea[data-testid="title"]', 'input[name="title"]'];
+    const desc = data.title;
+    const keys = data.keywords; // Chuỗi "key1, key2, key3"
+
+    // --- ADOBE STOCK ---
+    if (this.currentSite === "adobe") {
+      const titleSelectors = [
+        "textarea.title-input",
+        'input[data-testid="title"]',
+        'textarea[data-testid="title"]',
+        'input[name="title"]',
+      ];
       const titleInput = this.findElementBySelectors(titleSelectors);
 
-      const keywordSelectors = ["textarea[name=keywordsUITextArea]", 'textarea.keywords-input', 'input[name="keywords"]'];
+      const keywordSelectors = [
+        "textarea[name=keywordsUITextArea]",
+        "textarea.keywords-input",
+        'input[name="keywords"]',
+      ];
       const keysInput = this.findElementBySelectors(keywordSelectors);
 
       if (titleInput) this.simulateInput(titleInput, desc, true);
-      if (keysInput) { this.simulateInput(keysInput, keys, true); this.simulateEnter(keysInput); }
-    } 
-    else if (this.currentSite === 'shutterstock') {
-      // 1. Điền Description (Textarea)
-      const descInput = document.querySelector('textarea[name="description"]');
+      if (keysInput) {
+        this.simulateInput(keysInput, keys, true);
+        this.simulateEnter(keysInput);
+      }
+    }
+
+    // --- SHUTTERSTOCK ---
+    else if (this.currentSite === "shutterstock") {
+      console.log("📍 Đang xử lý Shutterstock...");
+
+      // 1. Điền Description
+      const descInput =
+        document.querySelector('textarea[name="description"]') ||
+        document.querySelector('textarea[data-testid="description-input"]');
+
       if (descInput) {
-          descInput.focus();
-          // Xóa nội dung cũ để tránh bị nối tiếp
-          descInput.value = ''; 
-          this.simulateInput(descInput, desc, true);
+        console.log("✅ Tìm thấy ô Description");
+        descInput.focus();
+        descInput.value = ""; // Reset
+        this.simulateInput(descInput, desc, true);
+      } else {
+        console.error(
+          "❌ Không tìm thấy ô Description (Kiểm tra lại Selector)"
+        );
       }
 
-      // 2. Điền Keyword (Input tags)
+      // 2. Điền Keywords (Quan trọng: Phải nhập từng từ)
       const keyInputSelectors = [
-          'input[id*="chip-input"]', 
-          'input[placeholder*="keyword"]', 
-          'input[aria-label*="Keywords"]',
-          'div[data-testid="tag-input"] input'
+        'input[aria-label="Keywords"]',
+        'input[placeholder*="keyword"]',
+        'div[data-testid="tag-input"] input',
+        'input[id*="chip-input"]',
       ];
       const keysInput = this.findElementBySelectors(keyInputSelectors);
-      
+
       if (keysInput) {
+        console.log("✅ Tìm thấy ô Keywords");
         keysInput.focus();
-        this.simulateInput(keysInput, keys, false);
-        // Đợi một chút để React nhận state
-        await new Promise(r => setTimeout(r, 200)); 
-        this.simulateEnter(keysInput);
+
+        // Tách chuỗi keyword thành mảng: "dog, cat" -> ["dog", "cat"]
+        const keywordList = keys
+          .split(",")
+          .map((k) => k.trim())
+          .filter((k) => k.length > 0);
+
+        // Nhập từng từ một
+        for (const key of keywordList) {
+          // 1. Gõ từ khóa vào
+          this.simulateInput(keysInput, key, false);
+
+          // 2. Chờ xíu cho UI phản hồi (Rất quan trọng)
+          await new Promise((r) => setTimeout(r, 50));
+
+          // 3. Nhấn Enter để tạo thẻ tag
+          this.simulateEnter(keysInput);
+
+          // 4. Chờ thẻ tag được tạo xong mới nhập từ tiếp theo
+          await new Promise((r) => setTimeout(r, 100));
+        }
       } else {
-        console.warn("Không tìm thấy ô nhập keyword Shutterstock");
+        console.error("❌ Không tìm thấy ô Keywords");
       }
     }
   }
 
   async startBatchProcessing() {
-    const skipFilled = document.getElementById('sb-skip-filled').checked;
+    const skipFilled = document.getElementById("sb-skip-filled").checked;
     let items = [];
-    
-    // Batch trên SS: Lấy các card ảnh trong grid
-    if (this.currentSite === 'adobe') items = document.querySelectorAll('.upload-tile__wrapper');
-    else items = document.querySelectorAll('img[data-testid^="card-media-"]'); 
 
-    if (!items.length) { this.showToast("Không tìm thấy ảnh nào!", "error"); return; }
-    
+    // Batch trên SS: Lấy các card ảnh trong grid
+    if (this.currentSite === "adobe")
+      items = document.querySelectorAll(".upload-tile__wrapper");
+    else items = document.querySelectorAll('img[data-testid^="card-media-"]');
+
+    if (!items.length) {
+      this.showToast("Không tìm thấy ảnh nào!", "error");
+      return;
+    }
+
     this.isBatchProcessing = true;
     this.updateBatchButtonUI(true);
     this.updateProgress(0, items.length, "Đang khởi động...");
@@ -695,46 +855,53 @@ class KeywordGenerator {
 
       this.updateProgress(i + 1, items.length);
 
-      if (this.currentSite === 'adobe') { 
-          item.click(); 
-          thumbnailSrc = item.querySelector('img').src; 
-      } 
-      else { 
-          // Shutterstock: Click vào box chứa ảnh để mở edit sidebar
-          const clickable = item.closest('div[tabindex]') || item.parentElement;
-          if (clickable) clickable.click(); 
-          thumbnailSrc = item.src; 
+      if (this.currentSite === "adobe") {
+        item.click();
+        thumbnailSrc = item.querySelector("img").src;
+      } else {
+        // Shutterstock: Click vào box chứa ảnh để mở edit sidebar
+        const clickable = item.closest("div[tabindex]") || item.parentElement;
+        if (clickable) clickable.click();
+        thumbnailSrc = item.src;
       }
 
-      await new Promise(r => setTimeout(r, 2000)); // Đợi sidebar mở
+      await new Promise((r) => setTimeout(r, 2000)); // Đợi sidebar mở
 
       if (skipFilled && this.hasExistingData()) {
-          this.updateProgress(i + 1, items.length, `Ảnh ${i+1}: Đã có dữ liệu. Bỏ qua...`);
-          await new Promise(r => setTimeout(r, 500));
-          continue;
+        this.updateProgress(
+          i + 1,
+          items.length,
+          `Ảnh ${i + 1}: Đã có dữ liệu. Bỏ qua...`
+        );
+        await new Promise((r) => setTimeout(r, 500));
+        continue;
       }
 
-      this.updateProgress(i + 1, items.length, `Ảnh ${i+1}: Đang gọi AI...`);
+      this.updateProgress(i + 1, items.length, `Ảnh ${i + 1}: Đang gọi AI...`);
       await this.processSingleImage(thumbnailSrc);
 
-      if (this.currentSite === 'shutterstock') {
-          await new Promise(r => setTimeout(r, 1500));
-          this.updateProgress(i + 1, items.length, `Ảnh ${i+1}: Đang lưu...`);
-          await this.saveShutterstock(); 
-          
-          for (let s = 3; s > 0; s--) {
-             this.updateProgress(i + 1, items.length, `Ảnh ${i+1}: Đợi ${s}s...`);
-             await new Promise(r => setTimeout(r, 1000));
-          }
+      if (this.currentSite === "shutterstock") {
+        await new Promise((r) => setTimeout(r, 1500));
+        this.updateProgress(i + 1, items.length, `Ảnh ${i + 1}: Đang lưu...`);
+        await this.saveShutterstock();
+
+        for (let s = 3; s > 0; s--) {
+          this.updateProgress(
+            i + 1,
+            items.length,
+            `Ảnh ${i + 1}: Đợi ${s}s...`
+          );
+          await new Promise((r) => setTimeout(r, 1000));
+        }
       } else {
-          await this.autoSaveAdobe();
-          await new Promise(r => setTimeout(r, 1000));
+        await this.autoSaveAdobe();
+        await new Promise((r) => setTimeout(r, 1000));
       }
     }
-    
+
     this.isBatchProcessing = false;
     this.updateBatchButtonUI(false);
-    this.hideProgress(); 
+    this.hideProgress();
     this.showToast("Hoàn tất xử lý Batch!", "success");
   }
 
@@ -742,29 +909,33 @@ class KeywordGenerator {
   async saveShutterstock() {
     // Selector mới dựa trên edit-dialog-save-button
     const selector = 'button[data-testid="edit-dialog-save-button"]';
-    
+
     let saveBtn = null;
-    for(let k=0; k<5; k++) {
-        saveBtn = document.querySelector(selector);
-        // Kiểm tra nút có tồn tại và KHÔNG bị disable
-        if(saveBtn && !saveBtn.disabled) break;
-        await new Promise(r => setTimeout(r, 500));
+    for (let k = 0; k < 5; k++) {
+      saveBtn = document.querySelector(selector);
+      // Kiểm tra nút có tồn tại và KHÔNG bị disable
+      if (saveBtn && !saveBtn.disabled) break;
+      await new Promise((r) => setTimeout(r, 500));
     }
 
     if (saveBtn && !saveBtn.disabled) {
-        saveBtn.click();
+      saveBtn.click();
     } else {
-        // Fallback: Tìm nút có chữ "Save"
-        const allBtns = Array.from(document.querySelectorAll('button'));
-        const fallbackBtn = allBtns.find(b => b.textContent.trim() === 'Save' && !b.disabled);
-        if (fallbackBtn) fallbackBtn.click();
-        else console.warn("Không tìm thấy nút Save hoặc nút đang bị khóa");
+      // Fallback: Tìm nút có chữ "Save"
+      const allBtns = Array.from(document.querySelectorAll("button"));
+      const fallbackBtn = allBtns.find(
+        (b) => b.textContent.trim() === "Save" && !b.disabled
+      );
+      if (fallbackBtn) fallbackBtn.click();
+      else console.warn("Không tìm thấy nút Save hoặc nút đang bị khóa");
     }
   }
 
   async autoSaveAdobe() {
-      const saveBtn = document.querySelector('button[data-t="save-work"]');
-      if (saveBtn) { saveBtn.click(); }
+    const saveBtn = document.querySelector('button[data-t="save-work"]');
+    if (saveBtn) {
+      saveBtn.click();
+    }
   }
 }
 
