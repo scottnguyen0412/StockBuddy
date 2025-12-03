@@ -300,7 +300,7 @@ class KeywordGenerator {
       <div class="sb-modal">
         <div class="sb-header">
           <h3 class="sb-title">
-            <span>✨</span> StockBuddy <span style="font-weight:400; color:#888; font-size:14px; margin-left:5px;">AI 2.0</span>
+            <span>✨</span> StockBuddy <span style="font-weight:400; color:#888; font-size:14px; margin-left:5px;">AI v2.0.0</span>
           </h3>
           <div class="sb-close">&times;</div>
         </div>

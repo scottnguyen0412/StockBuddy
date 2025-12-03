@@ -3,6 +3,9 @@
     "name": "StockBuddy - AI Keywords Generator",
     "version": "2.0.0",
     "description": "Auto generate keywords and titles for Adobe Stock and Shutterstock using Gemini AI",
+    "icons": {
+      "128": "images/logo-48.png"
+    },
     "permissions": [
       "activeTab",
       "storage",
