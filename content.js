@@ -528,13 +528,23 @@ class KeywordGenerator {
       ];
       const keysInput = this.findElementBySelectors(keywordSelectors);
 
+      // Kiểm tra độ dài nội dung
       const hasTitle = titleInput && titleInput.value.trim().length > 3;
-      const hasKeys = keysInput && keysInput.value.trim().length > 3;
-      return hasTitle || hasKeys;
+      const hasKeys = keysInput && keysInput.value.trim().length > 5;
+
+      return hasTitle && hasKeys; 
+      
     } else if (this.currentSite === "shutterstock") {
+      // 1. Kiểm tra Description
       const descInput = document.querySelector('textarea[name="description"]');
-      if (descInput && descInput.value.trim().length > 5) return true;
-      return false;
+      const hasDesc = descInput && descInput.value.trim().length > 5;
+
+      const existingKeywords = document.querySelectorAll(
+        '[data-testid="keyword-chip"], .MuiChip-root, button[aria-label^="Remove"]'
+      );
+      const hasKeys = existingKeywords.length >= 3;
+
+      return hasDesc && hasKeys;
     }
     return false;
   }
