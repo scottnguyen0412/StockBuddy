@@ -520,17 +520,16 @@ class KeywordGenerator {
         '[placeholder*="title" i]',
       ];
       const titleInput = this.findElementBySelectors(titleSelectors);
-
-      const keywordSelectors = [
-        "textarea[name=keywordsUITextArea]",
-        "textarea.keywords-input",
-        'input[name="keywords"]',
-      ];
-      const keysInput = this.findElementBySelectors(keywordSelectors);
-
-      // Kiểm tra độ dài nội dung
       const hasTitle = titleInput && titleInput.value.trim().length > 3;
-      const hasKeys = keysInput && keysInput.value.trim().length > 5;
+
+      const keywordInput = document.querySelector('textarea[name="keywordsUITextArea"]') || 
+                           document.getElementById('content-keywords-ui-textarea');
+      let keywordCount = 0;
+      if(keywordInput && keywordInput.value){
+        keywordCount = keywordInput.value.split(',').filter(kw => kw.trim().length > 0).length;
+      }
+      // Kiểm tra độ dài nội dung
+      const hasKeys = keywordCount >= 5;
 
       return hasTitle && hasKeys; 
       
