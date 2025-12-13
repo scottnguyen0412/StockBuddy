@@ -6,6 +6,11 @@ class KeywordGenerator {
     this.modal = null;
     this.progressBar = null;
     this.observer = null;
+
+    // Cấu hình mặc định
+    this.currentProvider = "gemini";
+    this.modelName = "google/gemini-2.5-flash-lite";
+
     this.init();
   }
 
@@ -17,7 +22,9 @@ class KeywordGenerator {
   }
 
   init() {
-    console.log(`StockBuddy 2.0 (Fixed) khởi động trên: ${this.currentSite}`);
+    console.log(
+      `StockBuddy 2.3 (Custom Scrollbar & UI Fix) khởi động trên: ${this.currentSite}`
+    );
     this.injectStyles();
     this.createFloatingButton();
     this.createMainModal();
@@ -36,16 +43,13 @@ class KeywordGenerator {
     });
   }
 
-  // --- UPDATED: Sửa vị trí nút Inline cho Shutterstock ---
   injectInlineButton() {
     if (this.currentSite !== "shutterstock") return;
 
-    // Selector chuẩn xác dựa trên HTML bạn cung cấp
     const descContainer = document.querySelector(
       'div[data-testid="description"]'
     );
 
-    // Chỉ chèn nếu chưa có nút
     if (
       descContainer &&
       !descContainer.parentNode.querySelector(".sb-inline-btn")
@@ -64,37 +68,33 @@ class KeywordGenerator {
         e.preventDefault();
         e.stopPropagation();
         if (this.isSingleProcessing) return;
-        // Truyền null để hàm findActiveImage tự đi tìm ảnh gốc
         this.processSingleImage(null, btn);
       };
 
-      // Chèn nút vào SAU container description để giao diện đẹp hơn
       descContainer.parentNode.insertBefore(btn, descContainer.nextSibling);
     }
   }
 
   injectStyles() {
-    const style = document.createElement('style');
-    
-    // ... (Phần logic chọn màu theme giữ nguyên như cũ) ...
+    const style = document.createElement("style");
+
     let btnGradient, btnShadow, themeColor;
-    if (this.currentSite === 'adobe') {
-        themeColor = '#0061FE';
-        btnGradient = 'linear-gradient(135deg, #0061FE 0%, #00C6FF 100%)';
-        btnShadow = 'rgba(0, 97, 254, 0.4)';
+    if (this.currentSite === "adobe") {
+      themeColor = "#0061FE";
+      btnGradient = "linear-gradient(135deg, #0061FE 0%, #00C6FF 100%)";
+      btnShadow = "rgba(0, 97, 254, 0.4)";
     } else {
-        themeColor = '#E11D48';
-        btnGradient = 'linear-gradient(135deg, #E11D48 0%, #C026D3 100%)';
-        btnShadow = 'rgba(225, 29, 72, 0.4)';
+      themeColor = "#E11D48";
+      btnGradient = "linear-gradient(135deg, #E11D48 0%, #C026D3 100%)";
+      btnShadow = "rgba(225, 29, 72, 0.4)";
     }
-    
+
     style.textContent = `
       :root {
         --sb-theme: ${themeColor};
         --sb-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
 
-      /* ... (Giữ nguyên toàn bộ các CSS animation và button cũ của bạn ở đây) ... */
       @keyframes sb-float { 
         0%, 100% { transform: translateX(-50%) translateY(0); } 
         50% { transform: translateX(-50%) translateY(-6px); } 
@@ -117,55 +117,95 @@ class KeywordGenerator {
       .sb-btn-content { display: flex; align-items: center; gap: 8px; }
       .sb-logo-text { text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
-      /* Modal Styles */
+      /* --- MODAL STYLES --- */
       .sb-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.4); backdrop-filter: blur(8px); z-index: 10001; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s; }
       .sb-modal-overlay.active { display: flex; opacity: 1; }
-      .sb-modal { background: rgba(255, 255, 255, 0.95); width: 420px; border-radius: 24px; box-shadow: 0 20px 60px -15px rgba(0,0,0,0.15); font-family: var(--sb-font); transform: scale(0.95); transition: transform 0.2s; border: 1px solid white; color: #1f2937; }
-      .sb-modal-overlay.active .sb-modal { transform: scale(1); }
-      .sb-header { padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #fff, #f9fafb); }
-      .sb-title { font-size: 18px; font-weight: 700; color: #111; margin: 0; display: flex; align-items: center; gap: 8px; }
-      .sb-close { cursor: pointer; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #999; background: #f3f4f6; transition: all 0.2s; }
-      .sb-close:hover { background: #e5e7eb; color: #111; }
-      .sb-body { padding: 24px; }
       
-      /* ... (Các style input, button, checkbox cũ giữ nguyên) ... */
+      .sb-modal { 
+        background: rgba(255, 255, 255, 0.98); 
+        width: 480px; 
+        border-radius: 24px; 
+        box-shadow: 0 20px 60px -15px rgba(0,0,0,0.2); 
+        font-family: var(--sb-font); 
+        transform: scale(0.95); transition: transform 0.2s; 
+        border: 1px solid #fff; 
+        color: #1f2937; 
+        overflow: hidden; /* Bo góc đẹp hơn */
+      }
+      .sb-modal-overlay.active .sb-modal { transform: scale(1); }
+      
+      .sb-header { padding: 18px 24px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; background: #fff; }
+      .sb-title { font-size: 18px; font-weight: 700; color: #111; margin: 0; display: flex; align-items: center; gap: 8px; }
+      .sb-close { cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #666; background: #f3f4f6; transition: all 0.2s; font-size: 20px; line-height: 1; }
+      .sb-close:hover { background: #e5e7eb; color: #000; }
+      
+      /* --- CUSTOM SCROLLBAR & BODY --- */
+      .sb-body { 
+        padding: 24px; 
+        max-height: 75vh; 
+        overflow-y: auto; 
+        overflow-x: hidden;
+      }
+
+      /* Thanh cuộn đẹp */
+      .sb-body::-webkit-scrollbar { width: 6px; }
+      .sb-body::-webkit-scrollbar-track { background: transparent; }
+      .sb-body::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.15); border-radius: 10px; }
+      .sb-body::-webkit-scrollbar-thumb:hover { background-color: rgba(0,0,0,0.25); }
+
+      /* Form Elements */
+      .sb-form-group { margin-bottom: 20px; }
       .sb-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b7280; margin-bottom: 8px; letter-spacing: 0.5px; }
       .sb-input-wrapper { position: relative; }
-      .sb-input { width: 100%; padding: 14px 14px 14px 40px; background: #fff; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px; color: #111; transition: all 0.2s; box-sizing: border-box; }
-      .sb-input:focus { border-color: var(--sb-theme); box-shadow: 0 0 0 4px rgba(0,0,0,0.05); outline: none; }
+      
+      .sb-input { 
+        width: 100%; padding: 12px 12px 12px 40px; 
+        background: #fff !important; 
+        border: 2px solid #e5e7eb; border-radius: 12px; 
+        font-size: 14px; color: #111 !important; 
+        transition: all 0.2s; box-sizing: border-box; 
+      }
+      
+      /* Fix Select Box Styles */
+      .sb-select { 
+        width: 100%; padding: 12px; 
+        background-color: #fff !important; 
+        color: #1f2937 !important; 
+        border: 2px solid #e5e7eb; border-radius: 12px; 
+        font-size: 14px; box-sizing: border-box; cursor: pointer; 
+        font-family: var(--sb-font); 
+        appearance: none; -webkit-appearance: none; -moz-appearance: none;
+        opacity: 1 !important; 
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); 
+        background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; 
+      }
+      .sb-select option { color: #1f2937; background: #fff; padding: 10px; }
+      
+      .sb-select:focus, .sb-input:focus { border-color: var(--sb-theme); box-shadow: 0 0 0 4px rgba(0,0,0,0.05); outline: none; }
       .sb-icon-key { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 16px; }
-      .sb-btn-save { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; cursor: pointer; margin-top: 16px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); display: flex; justify-content: center; align-items: center; gap: 8px; }
+      
+      .sb-btn-save { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; cursor: pointer; margin-top: 10px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s; }
       .sb-btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); }
       
-      .sb-checkbox-group { display: flex; align-items: center; gap: 12px; margin-top: 24px; margin-bottom: 24px; padding: 16px; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.2s; }
+      .sb-checkbox-group { display: flex; align-items: center; gap: 12px; margin-top: 20px; margin-bottom: 20px; padding: 14px; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.2s; }
       .sb-checkbox-group:hover { background: #fff; border-color: #d1d5db; }
-      .sb-checkbox-group input { width: 18px; height: 18px; accent-color: var(--sb-theme); }
+      .sb-checkbox-group input { width: 18px; height: 18px; accent-color: var(--sb-theme); cursor: pointer; }
       .sb-checkbox-text { font-size: 14px; font-weight: 600; color: #374151; }
       
-      .sb-divider { height: 1px; background: #e5e7eb; margin: 28px 0; position: relative; }
+      .sb-divider { height: 1px; background: #e5e7eb; margin: 24px 0; position: relative; }
       .sb-divider::after { content: 'ACTIONS'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #fff; padding: 0 10px; color: #9ca3af; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
       
       .sb-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
-      .sb-btn-big { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 12px; transition: all 0.25s; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+      .sb-btn-big { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 8px; transition: all 0.25s; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
       .sb-btn-big:hover { transform: translateY(-4px); box-shadow: 0 15px 30px -5px rgba(0,0,0,0.08); border-color: transparent; }
-      .sb-big-icon-wrap { width: 42px; height: 42px; border-radius: 12px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.2s; color: #666; }
-      .sb-big-title { color: #111; font-size: 15px; font-weight: 700; }
-      .sb-big-desc { color: #6b7280; font-size: 12px; margin-top: 2px; }
+      .sb-big-icon-wrap { width: 38px; height: 38px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.2s; color: #666; }
+      .sb-big-title { color: #111; font-size: 14px; font-weight: 700; }
+      .sb-big-desc { color: #6b7280; font-size: 11px; margin-top: 0px; }
       .sb-btn-single:hover .sb-big-icon-wrap { background: var(--sb-theme); color: white; transform: rotate(-5deg) scale(1.1); box-shadow: 0 5px 15px -5px var(--sb-theme); }
       .sb-btn-batch:hover .sb-big-icon-wrap { background: #F59E0B; color: white; transform: rotate(5deg) scale(1.1); box-shadow: 0 5px 15px -5px #F59E0B; }
       .sb-btn-stop { width: 100%; padding: 14px; border-radius: 12px; border:none; background: #EF4444; color: white; cursor:pointer; font-weight:700; margin-top:10px; }
 
-      /* --- FOOTER STYLE (MỚI) --- */
-      .sb-footer {
-        margin-top: 20px;
-        text-align: center;
-        font-size: 11px;
-        color: #9ca3af;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-        opacity: 0.8;
-        transition: opacity 0.2s;
-      }
+      .sb-footer { margin-top: 24px; text-align: center; font-size: 11px; color: #9ca3af; font-weight: 500; letter-spacing: 0.5px; opacity: 0.8; transition: opacity 0.2s; }
       .sb-footer:hover { opacity: 1; color: var(--sb-theme); }
 
       /* Toast & Progress */
@@ -180,15 +220,17 @@ class KeywordGenerator {
       .sb-highlight-img { outline: 4px solid var(--sb-theme) !important; outline-offset: -4px; transition: outline 0.3s; }
       .sb-inline-btn { margin-top: 12px; width: 100%; padding: 10px; background: #fff; color: #E11D48; border: 1px solid #FECDD3; border-radius: 8px; font-family: var(--sb-font); font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
       .sb-inline-btn:hover { background: #E11D48; color: white; transform: translateY(-1px); }
+      
+      .sb-hidden { display: none !important; }
     `;
-    
+
     document.head.appendChild(style);
   }
 
   createFloatingButton() {
-    const btn = document.createElement('div');
-    btn.className = 'sb-floating-btn';
-    
+    const btn = document.createElement("div");
+    btn.className = "sb-floating-btn";
+
     btn.innerHTML = `
       <div class="sb-drag-handle" title="Kéo để di chuyển">
         <svg viewBox="0 0 10 16" width="10" height="16" fill="currentColor">
@@ -202,11 +244,11 @@ class KeywordGenerator {
         <span class="sb-logo-text">StockBuddy AI</span>
       </div>
     `;
-    
+
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
 
-    btn.addEventListener('mousedown', (e) => {
+    btn.addEventListener("mousedown", (e) => {
       if (e.button !== 0) return;
       isDragging = true;
       startX = e.clientX;
@@ -214,19 +256,18 @@ class KeywordGenerator {
       const rect = btn.getBoundingClientRect();
       initialLeft = rect.left;
       initialTop = rect.top;
-      
-      btn.style.bottom = 'auto'; 
-      btn.style.right = 'auto';
+
+      btn.style.bottom = "auto";
+      btn.style.right = "auto";
       btn.style.left = `${initialLeft}px`;
       btn.style.top = `${initialTop}px`;
-      btn.style.transform = 'none'; // Tắt animation float và center khi kéo
-      btn.style.animation = 'none';
-      
-      btn.style.transition = 'none'; 
-      btn.style.cursor = 'grabbing';
+      btn.style.transform = "none";
+      btn.style.animation = "none";
+      btn.style.transition = "none";
+      btn.style.cursor = "grabbing";
     });
-    
-    document.addEventListener('mousemove', (e) => {
+
+    document.addEventListener("mousemove", (e) => {
       if (!isDragging) return;
       e.preventDefault();
       const dx = e.clientX - startX;
@@ -235,18 +276,16 @@ class KeywordGenerator {
       btn.style.top = `${initialTop + dy}px`;
     });
 
-    document.addEventListener('mouseup', () => {
-      if(isDragging) {
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
         isDragging = false;
-        btn.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; 
-        btn.style.cursor = 'pointer';
-        // Khôi phục animation float nhẹ khi thả ra (optional, nhưng cần cẩn thận với transform)
-        // Ở đây ta không khôi phục animation để tránh nút bị nhảy vị trí
+        btn.style.transition = "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        btn.style.cursor = "pointer";
       }
     });
 
-    btn.addEventListener('click', (e) => {
-      if (e.target.closest('.sb-drag-handle')) return;
+    btn.addEventListener("click", (e) => {
+      if (e.target.closest(".sb-drag-handle")) return;
       if (!isDragging) this.openModal();
     });
 
@@ -292,30 +331,63 @@ class KeywordGenerator {
     }
   }
 
+  // --- MAIN MODAL ---
   createMainModal() {
-    const overlay = document.createElement('div');
-    overlay.className = 'sb-modal-overlay';
-    
+    const overlay = document.createElement("div");
+    overlay.className = "sb-modal-overlay";
+
     overlay.innerHTML = `
       <div class="sb-modal">
         <div class="sb-header">
           <h3 class="sb-title">
-            <span>✨</span> StockBuddy <span style="font-weight:400; color:#888; font-size:14px; margin-left:5px;">AI v2.0.0</span>
+            <span>✨</span> StockBuddy <span style="font-weight:400; color:#888; font-size:14px; margin-left:5px;">AI v2.3</span>
           </h3>
           <div class="sb-close">&times;</div>
         </div>
         
         <div class="sb-body">
+          
           <div class="sb-form-group">
+            <label class="sb-label">AI Provider</label>
+            <select id="sb-provider-select" class="sb-select">
+              <option value="gemini">Google Gemini (Free)</option>
+              <option value="openrouter">OpenRouter (Nhiều Model)</option>
+            </select>
+          </div>
+
+          <div id="sb-group-gemini" class="sb-form-group">
             <label class="sb-label">Gemini API Key</label>
             <div class="sb-input-wrapper">
               <span class="sb-icon-key">🔑</span>
               <input type="password" id="sb-api-key" class="sb-input" placeholder="Nhập khóa API của bạn...">
             </div>
-            <button id="sb-save-settings" class="sb-btn-save">
-              <span>💾</span> Lưu thiết lập
-            </button>
           </div>
+
+          <div id="sb-group-openrouter" class="sb-form-group sb-hidden">
+            <label class="sb-label" style="margin-top: 16px;">OpenRouter API Key</label>
+            <div class="sb-input-wrapper" style="margin-bottom:16px;">
+              <span class="sb-icon-key">🔑</span>
+              <input type="password" id="sb-or-key" class="sb-input" placeholder="sk-or-v1-...">
+            </div>
+
+            <label  class="sb-label">Chọn Model</label>
+            <select id="sb-or-model-select" class="sb-select">
+              <option value="google/gemini-2.5-flash-lite">Google: Gemini 2.5 Flash-lite (Khuyên dùng)</option>
+              <option value="google/gemini-pro-1.5">Google: Gemini 1.5 Pro</option>
+              <option value="openai/gpt-4o-mini">OpenAI: GPT-4o Mini</option>
+              <option value="openai/gpt-4o">OpenAI: GPT-4o</option>
+              <option value="anthropic/claude-3.5-sonnet">Anthropic: Claude 3.5 Sonnet</option>
+              <option value="custom">-- Tự nhập Model ID khác --</option>
+            </select>
+            
+            <div id="sb-or-custom-model-wrapper" class="sb-input-wrapper sb-hidden" style="margin-top:10px;">
+                <input type="text" id="sb-or-custom-model" class="sb-input" placeholder="Ví dụ: google/gemma-7b-it">
+            </div>
+          </div>
+
+          <button id="sb-save-settings" class="sb-btn-save">
+            <span>💾</span> Lưu thiết lập
+          </button>
 
           <label class="sb-checkbox-group" for="sb-skip-filled">
             <input type="checkbox" id="sb-skip-filled" checked>
@@ -352,35 +424,133 @@ class KeywordGenerator {
         </div>
       </div>
     `;
-    
-    // ... (Phần gán sự kiện onclick phía dưới giữ nguyên) ...
-    const closeBtn = overlay.querySelector('.sb-close');
-    closeBtn.onclick = () => overlay.classList.remove('active');
-    overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('active'); };
 
-    overlay.querySelector('#sb-save-settings').onclick = () => this.saveSettings();
-    overlay.querySelector('#sb-run-single').onclick = () => { overlay.classList.remove('active'); this.processSingleImage(); };
-    overlay.querySelector('#sb-run-batch').onclick = () => { overlay.classList.remove('active'); this.startBatchProcessing(); };
-    overlay.querySelector('#sb-stop-batch').onclick = () => { this.isBatchProcessing = false; this.updateBatchButtonUI(false); };
+    // --- SỰ KIỆN ---
+    const closeBtn = overlay.querySelector(".sb-close");
+    closeBtn.onclick = () => overlay.classList.remove("active");
+    overlay.onclick = (e) => {
+      if (e.target === overlay) overlay.classList.remove("active");
+    };
+
+    // Toggle logic
+    const providerSelect = overlay.querySelector("#sb-provider-select");
+    const groupGemini = overlay.querySelector("#sb-group-gemini");
+    const groupOR = overlay.querySelector("#sb-group-openrouter");
+
+    providerSelect.onchange = () => {
+      if (providerSelect.value === "gemini") {
+        groupGemini.classList.remove("sb-hidden");
+        groupOR.classList.add("sb-hidden");
+      } else {
+        groupGemini.classList.add("sb-hidden");
+        groupOR.classList.remove("sb-hidden");
+      }
+    };
+
+    const modelSelect = overlay.querySelector("#sb-or-model-select");
+    const customModelWrapper = overlay.querySelector(
+      "#sb-or-custom-model-wrapper"
+    );
+
+    modelSelect.onchange = () => {
+      if (modelSelect.value === "custom") {
+        customModelWrapper.classList.remove("sb-hidden");
+      } else {
+        customModelWrapper.classList.add("sb-hidden");
+      }
+    };
+
+    overlay.querySelector("#sb-save-settings").onclick = () =>
+      this.saveSettings();
+    overlay.querySelector("#sb-run-single").onclick = () => {
+      overlay.classList.remove("active");
+      this.processSingleImage();
+    };
+    overlay.querySelector("#sb-run-batch").onclick = () => {
+      overlay.classList.remove("active");
+      this.startBatchProcessing();
+    };
+    overlay.querySelector("#sb-stop-batch").onclick = () => {
+      this.isBatchProcessing = false;
+      this.updateBatchButtonUI(false);
+    };
 
     document.body.appendChild(overlay);
     this.modal = overlay;
   }
 
   async openModal() {
-    const { apiKey } = await chrome.storage.sync.get(["apiKey"]);
-    if (apiKey) document.getElementById("sb-api-key").value = apiKey;
+    const data = await chrome.storage.sync.get([
+      "apiKey",
+      "provider",
+      "openRouterKey",
+      "modelName",
+    ]);
+
+    // Fill Gemini
+    if (data.apiKey) document.getElementById("sb-api-key").value = data.apiKey;
+
+    // Fill OpenRouter
+    if (data.openRouterKey)
+      document.getElementById("sb-or-key").value = data.openRouterKey;
+
+    // Fill Model Logic
+    const savedModel = data.modelName || "google/gemini-2.5-flash-lite";
+    const modelSelect = document.getElementById("sb-or-model-select");
+    const customInput = document.getElementById("sb-or-custom-model");
+
+    const options = Array.from(modelSelect.options).map((o) => o.value);
+    if (options.includes(savedModel)) {
+      modelSelect.value = savedModel;
+      customInput.value = "";
+    } else {
+      modelSelect.value = "custom";
+      customInput.value = savedModel;
+    }
+
+    // Provider
+    const providerSelect = document.getElementById("sb-provider-select");
+    providerSelect.value = data.provider || "gemini";
+
+    // Trigger UI events (quan trọng để cập nhật UI)
+    providerSelect.dispatchEvent(new Event("change"));
+    modelSelect.dispatchEvent(new Event("change"));
+
     this.updateBatchButtonUI(this.isBatchProcessing);
     this.modal.classList.add("active");
   }
 
   async saveSettings() {
+    const provider = document.getElementById("sb-provider-select").value;
     const apiKey = document.getElementById("sb-api-key").value.trim();
-    if (!apiKey) {
-      this.showToast("Vui lòng nhập API Key!", "error");
+    const openRouterKey = document.getElementById("sb-or-key").value.trim();
+
+    let modelName = document.getElementById("sb-or-model-select").value;
+    if (modelName === "custom") {
+      modelName = document.getElementById("sb-or-custom-model").value.trim();
+    }
+
+    if (provider === "gemini" && !apiKey) {
+      this.showToast("Vui lòng nhập Gemini API Key!", "error");
       return;
     }
-    await chrome.storage.sync.set({ apiKey });
+    if (provider === "openrouter") {
+      if (!openRouterKey) {
+        this.showToast("Vui lòng nhập OpenRouter API Key!", "error");
+        return;
+      }
+      if (!modelName) {
+        this.showToast("Vui lòng chọn hoặc nhập tên Model!", "error");
+        return;
+      }
+    }
+
+    await chrome.storage.sync.set({
+      apiKey,
+      provider,
+      openRouterKey,
+      modelName,
+    });
 
     const btn = document.getElementById("sb-save-settings");
     const oldText = btn.textContent;
@@ -422,6 +592,8 @@ class KeywordGenerator {
     }, 4000);
   }
 
+  // --- API HANDLERS ---
+
   async callGeminiAPI(base64, apiKey) {
     const prompt = `Analyze this stock photo and generate:
             1. A compelling title (max 200 chars, suitable for stock photography).
@@ -437,7 +609,10 @@ class KeywordGenerator {
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
       body: JSON.stringify({
         contents: [
           {
@@ -449,12 +624,75 @@ class KeywordGenerator {
         ],
       }),
     });
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    if (!response.ok) throw new Error(`Gemini API Error: ${response.status}`);
     const data = await response.json();
     const text = data.candidates[0].content.parts[0].text;
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) return JSON.parse(jsonMatch[0]);
     else throw new Error("Invalid JSON response");
+  }
+
+  // --- UPDATED: Sửa Prompt OpenRouter ---
+  async callOpenRouterAPI(base64, apiKey, model) {
+    // Thêm yêu cầu "minimum 6 words" vào prompt
+    const prompt = `Analyze this stock photo and generate:
+            1. A compelling title (minimum 6 words, max 200 chars, suitable for stock photography).
+               IMPORTANT: Do NOT include any personal names, photographer names, or "By [Name]".
+               IMPORTANT: Do NOT use special characters like "&", "|", or single quotes (') in the title. Keep it clean text.
+            2. 30-45 relevant keywords separated by commas.
+            Make it SEO-friendly and descriptive. Format as JSON:
+            {
+              "title": "Title here",
+              "keywords": "keyword1, keyword2, ..."
+            }
+            ONLY RETURN THE JSON.`;
+
+    const url = "https://openrouter.ai/api/v1/chat/completions";
+    const body = {
+      model: model,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${base64}`,
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://stockbuddy-extension.com",
+        "X-Title": "StockBuddy Extension",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`OpenRouter Error: ${response.status} - ${errText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) return JSON.parse(jsonMatch[0]);
+
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      throw new Error("Invalid JSON response from OpenRouter");
+    }
   }
 
   // --- HELPERS (Hack React Input) ---
@@ -483,7 +721,7 @@ class KeywordGenerator {
     }
 
     element.dispatchEvent(new Event("input", { bubbles: true }));
-    element.dispatchEvent(new Event("change", { bubbles: true })); // Thêm event change
+    element.dispatchEvent(new Event("change", { bubbles: true }));
     if (shouldBlur) element.blur();
   }
 
@@ -522,33 +760,30 @@ class KeywordGenerator {
       const titleInput = this.findElementBySelectors(titleSelectors);
       const hasTitle = titleInput && titleInput.value.trim().length > 3;
 
-      const keywordInput = document.querySelector('textarea[name="keywordsUITextArea"]') || 
-                           document.getElementById('content-keywords-ui-textarea');
+      const keywordInput =
+        document.querySelector('textarea[name="keywordsUITextArea"]') ||
+        document.getElementById("content-keywords-ui-textarea");
       let keywordCount = 0;
-      if(keywordInput && keywordInput.value){
-        keywordCount = keywordInput.value.split(',').filter(kw => kw.trim().length > 0).length;
+      if (keywordInput && keywordInput.value) {
+        keywordCount = keywordInput.value
+          .split(",")
+          .filter((kw) => kw.trim().length > 0).length;
       }
-      // Kiểm tra độ dài nội dung
       const hasKeys = keywordCount >= 5;
 
-      return hasTitle && hasKeys; 
-      
+      return hasTitle && hasKeys;
     } else if (this.currentSite === "shutterstock") {
-      // 1. Kiểm tra Description
       const descInput = document.querySelector('textarea[name="description"]');
       const hasDesc = descInput && descInput.value.trim().length > 5;
-
       const existingKeywords = document.querySelectorAll(
         '[data-testid="keyword-chip"], .MuiChip-root, button[aria-label^="Remove"]'
       );
       const hasKeys = existingKeywords.length >= 3;
-
       return hasDesc && hasKeys;
     }
     return false;
   }
 
-  // --- UPDATED: Sửa logic tìm ảnh (Quan trọng) ---
   findActiveImage() {
     if (this.currentSite === "adobe") {
       return (
@@ -558,25 +793,21 @@ class KeywordGenerator {
     }
 
     if (this.currentSite === "shutterstock") {
-      // 1. Ưu tiên tìm ảnh trong sidebar editor (dựa trên HTML bạn đưa)
       const sidebarImg = document.querySelector(
         'img[src*="pending_photos"][style*="max-height"]'
       );
       if (sidebarImg) return sidebarImg;
 
-      // 2. Tìm trong grid item đang checked
       const activeCardImg = document.querySelector(
         'div[aria-checked="true"] img[data-testid^="card-media-"]'
       );
       if (activeCardImg) return activeCardImg;
 
-      // 3. Tìm grid item đang focus
       const focusedWrapper = document.querySelector(
         'div[tabindex="0"] img[data-testid^="card-media-"]'
       );
       if (focusedWrapper) return focusedWrapper;
 
-      // 4. Nếu đang Single mode, có thể lấy ảnh đầu tiên trong danh sách grid làm fallback
       if (this.isSingleProcessing) {
         const firstImg = document.querySelector(
           'img[data-testid^="card-media-"]'
@@ -587,11 +818,9 @@ class KeywordGenerator {
     return null;
   }
 
-  // --- PROCESS SINGLE IMAGE ---
   async processSingleImage(specificImgSrc = null, btnElement = null) {
     console.log("🚀 [START] Bắt đầu hàm processSingleImage");
 
-    // FORCE RESET: Đặt lại trạng thái để tránh bị kẹt nếu lần trước lỗi
     this.isSingleProcessing = false;
     this.isSingleProcessing = true;
 
@@ -625,30 +854,44 @@ class KeywordGenerator {
     }
 
     try {
-      this.showToast("Gemini đang phân tích ảnh...", "info");
+      const settings = await chrome.storage.sync.get([
+        "apiKey",
+        "provider",
+        "openRouterKey",
+        "modelName",
+      ]);
+      const provider = settings.provider || "gemini";
 
-      // 1. Gọi hàm tải ảnh (đã thêm log ở trên)
+      this.showToast(
+        `${
+          provider === "openrouter" ? "OpenRouter" : "Gemini"
+        } đang phân tích...`,
+        "info"
+      );
+
       const base64 = await this.urlToBase64(imgSrc);
 
-      // 2. Kiểm tra API Key
-      const { apiKey } = await chrome.storage.sync.get(["apiKey"]);
-      if (!apiKey) {
-        console.error("🔑 Thiếu API Key");
-        this.showToast("Thiếu API Key!", "error");
-        this.openModal();
-        this.resetSingleState(btnElement, originalBtnText);
-        return;
+      let result;
+      if (provider === "openrouter") {
+        if (!settings.openRouterKey)
+          throw new Error("Chưa nhập OpenRouter API Key!");
+        const model = settings.modelName || "google/gemini-2.5-flash-lite";
+        result = await this.callOpenRouterAPI(
+          base64,
+          settings.openRouterKey,
+          model
+        );
+      } else {
+        if (!settings.apiKey) throw new Error("Chưa nhập Gemini API Key!");
+        result = await this.callGeminiAPI(base64, settings.apiKey);
       }
-
-      // console.log("🤖 [4] Đang gửi ảnh lên Gemini API...");
-      const result = await this.callGeminiAPI(base64, apiKey);
-      // console.log("✨ [5] Gemini trả về kết quả:", result);
 
       await this.fillForms(result);
       this.showToast("Đã điền xong!", "success");
     } catch (e) {
       console.error("💥 [CRITICAL ERROR]:", e);
       this.showToast(`Lỗi: ${e.message}`, "error");
+      if (e.message.includes("Key")) this.openModal();
     } finally {
       console.log("🏁 [END] Kết thúc quy trình");
       this.resetSingleState(btnElement, originalBtnText);
@@ -664,17 +907,14 @@ class KeywordGenerator {
   }
 
   async urlToBase64(url) {
-    // console.log(`📡 [1] Đang gọi Background để tải ảnh: ${url.substring(0, 50)}...`);
-
     return new Promise((resolve, reject) => {
       try {
         chrome.runtime.sendMessage(
           { action: "fetchImageBase64", url: url },
           (response) => {
-            // Kiểm tra lỗi kết nối extension
             if (chrome.runtime.lastError) {
               console.error(
-                "🔥 [Lỗi Kết Nối] Không gọi được Background. Bạn đã Reload Extension chưa?",
+                "🔥 [Lỗi Kết Nối] Không gọi được Background.",
                 chrome.runtime.lastError
               );
               reject(new Error(chrome.runtime.lastError.message));
@@ -682,7 +922,6 @@ class KeywordGenerator {
             }
 
             if (response && response.success) {
-              // console.log(`✅ [2] Background đã trả về ảnh (Độ dài Base64: ${response.data.length})`);
               resolve(response.data);
             } else {
               console.error("❌ [3] Background báo lỗi tải ảnh:", response);
@@ -702,10 +941,8 @@ class KeywordGenerator {
   }
 
   async fillForms(data) {
-    // console.log("🤖 StockBuddy Debug - Data nhận được:", data);
-
     const desc = data.title;
-    const keys = data.keywords; // Chuỗi "key1, key2, key3"
+    const keys = data.keywords;
 
     // --- ADOBE STOCK ---
     if (this.currentSite === "adobe") {
@@ -735,23 +972,16 @@ class KeywordGenerator {
     else if (this.currentSite === "shutterstock") {
       console.log("📍 Đang xử lý Shutterstock...");
 
-      // 1. Điền Description
       const descInput =
         document.querySelector('textarea[name="description"]') ||
         document.querySelector('textarea[data-testid="description-input"]');
 
       if (descInput) {
-        console.log("✅ Tìm thấy ô Description");
         descInput.focus();
-        descInput.value = ""; // Reset
+        descInput.value = "";
         this.simulateInput(descInput, desc, true);
-      } else {
-        console.error(
-          "❌ Không tìm thấy ô Description (Kiểm tra lại Selector)"
-        );
       }
 
-      // 2. Điền Keywords (Quan trọng: Phải nhập từng từ)
       const keyInputSelectors = [
         'input[aria-label="Keywords"]',
         'input[placeholder*="keyword"]',
@@ -761,31 +991,18 @@ class KeywordGenerator {
       const keysInput = this.findElementBySelectors(keyInputSelectors);
 
       if (keysInput) {
-        console.log("✅ Tìm thấy ô Keywords");
         keysInput.focus();
-
-        // Tách chuỗi keyword thành mảng: "dog, cat" -> ["dog", "cat"]
         const keywordList = keys
           .split(",")
           .map((k) => k.trim())
           .filter((k) => k.length > 0);
 
-        // Nhập từng từ một
         for (const key of keywordList) {
-          // 1. Gõ từ khóa vào
           this.simulateInput(keysInput, key, false);
-
-          // 2. Chờ xíu cho UI phản hồi (Rất quan trọng)
           await new Promise((r) => setTimeout(r, 50));
-
-          // 3. Nhấn Enter để tạo thẻ tag
           this.simulateEnter(keysInput);
-
-          // 4. Chờ thẻ tag được tạo xong mới nhập từ tiếp theo
           await new Promise((r) => setTimeout(r, 100));
         }
-      } else {
-        console.error("❌ Không tìm thấy ô Keywords");
       }
     }
   }
@@ -794,7 +1011,6 @@ class KeywordGenerator {
     const skipFilled = document.getElementById("sb-skip-filled").checked;
     let items = [];
 
-    // Batch trên SS: Lấy các card ảnh trong grid
     if (this.currentSite === "adobe")
       items = document.querySelectorAll(".upload-tile__wrapper");
     else items = document.querySelectorAll('img[data-testid^="card-media-"]');
@@ -819,13 +1035,12 @@ class KeywordGenerator {
         item.click();
         thumbnailSrc = item.querySelector("img").src;
       } else {
-        // Shutterstock: Click vào box chứa ảnh để mở edit sidebar
         const clickable = item.closest("div[tabindex]") || item.parentElement;
         if (clickable) clickable.click();
         thumbnailSrc = item.src;
       }
 
-      await new Promise((r) => setTimeout(r, 2000)); // Đợi sidebar mở
+      await new Promise((r) => setTimeout(r, 2000));
 
       if (skipFilled && this.hasExistingData()) {
         this.updateProgress(
@@ -865,29 +1080,22 @@ class KeywordGenerator {
     this.showToast("Hoàn tất xử lý Batch!", "success");
   }
 
-  // --- UPDATED: Save Shutterstock (Sử dụng selector data-testid mới) ---
   async saveShutterstock() {
-    // Selector mới dựa trên edit-dialog-save-button
     const selector = 'button[data-testid="edit-dialog-save-button"]';
-
     let saveBtn = null;
     for (let k = 0; k < 5; k++) {
       saveBtn = document.querySelector(selector);
-      // Kiểm tra nút có tồn tại và KHÔNG bị disable
       if (saveBtn && !saveBtn.disabled) break;
       await new Promise((r) => setTimeout(r, 500));
     }
-
     if (saveBtn && !saveBtn.disabled) {
       saveBtn.click();
     } else {
-      // Fallback: Tìm nút có chữ "Save"
       const allBtns = Array.from(document.querySelectorAll("button"));
       const fallbackBtn = allBtns.find(
         (b) => b.textContent.trim() === "Save" && !b.disabled
       );
       if (fallbackBtn) fallbackBtn.click();
-      else console.warn("Không tìm thấy nút Save hoặc nút đang bị khóa");
     }
   }
 
